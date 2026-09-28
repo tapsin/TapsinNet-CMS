@@ -33,6 +33,21 @@
                     <?php if ((int) $c['is_spam'] === 1): ?><span class="badge badge--danger"><?= e(t('admin.spam')) ?></span><?php endif; ?>
                 </div>
                 <p class="comment-card__body"><?= e($c['body']) ?></p>
+
+                <!-- Yönetici notu — içerik kutusunda tutulur, ziyaretçiye
+                     gösterilmez. Kaydet düğmesi ayrı form; aynı kartın
+                     eylem formuyla iç içe geçmemesi için ayrı yazıldı. -->
+                <form method="post" action="<?= e(url('/admin/yorumlar/islem/' . $id)) ?>"
+                      class="comment-card__note-form">
+                    <?= csrf_field() ?>
+                    <label class="sr-only" for="note-<?= (int) $id ?>"><?= e(t('admin.note_saved')) ?></label>
+                    <input type="hidden" name="islem" value="not">
+                    <textarea id="note-<?= (int) $id ?>" name="admin_note" class="input"
+                              rows="2" maxlength="2000"
+                              placeholder="<?= e(t('admin.comment_note_ph')) ?>"><?= e((string) ($c['admin_note'] ?? '')) ?></textarea>
+                    <button type="submit" class="btn btn--ghost btn--sm"><?= e(t('admin.note_save')) ?></button>
+                </form>
+
                 <form method="post" action="<?= e(url('/admin/yorumlar/islem/' . $id)) ?>" class="btn-row">
                     <?= csrf_field() ?>
                     <?php if ((int) $c['is_approved'] !== 1): ?>

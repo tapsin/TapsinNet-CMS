@@ -6,7 +6,7 @@ namespace Models;
 use Core\Database;
 use Core\Model;
 use Core\Paginator;
-use Core\Str;
+use Core\Sanitizer;
 
 /**
  * Ziyaretçi yorumları — admin onayıyla yayınlanır.
@@ -76,6 +76,18 @@ final class Comment extends Model
     {
         Database::execute('UPDATE comments SET is_spam = :s, updated_at = :u WHERE id = :id',
             ['s' => $spam ? 1 : 0, 'u' => now(), 'id' => $id]);
+    }
+
+    /**
+     * Yönetici notu.
+     *
+     * NOT: Str::textarea() diye bir metot YOK; doğrusu Sanitizer::textarea.
+     * Yanlış çağrı yönetici notu kaydederken 500 veriyordu.
+     */
+    public static function saveNote(int $id, string $note): void
+    {
+        Database::execute('UPDATE comments SET admin_note = :n, updated_at = :u WHERE id = :id',
+            ['n' => Sanitizer::textarea($note), 'u' => now(), 'id' => $id]);
     }
 
     /** Yorumun ait olduğu içeriğin başlığını çözer. */

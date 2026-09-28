@@ -6,7 +6,7 @@ namespace Models;
 use Core\Database;
 use Core\Model;
 use Core\Paginator;
-use Core\Str;
+use Core\Sanitizer;
 
 /**
  * İletişim formu mesajları.
@@ -90,8 +90,10 @@ final class Message extends Model
 
     public static function saveNote(int $id, string $note): void
     {
+        // NOT: Str::textarea() diye bir metot YOK; doğrusu Sanitizer::textarea.
+        // Yanlış çağrı yönetici notu kaydederken 500 veriyordu.
         Database::execute('UPDATE messages SET admin_note = :n, updated_at = :u WHERE id = :id',
-            ['n' => Str::textarea($note), 'u' => now(), 'id' => $id]);
+            ['n' => Sanitizer::textarea($note), 'u' => now(), 'id' => $id]);
     }
 
     /** Yeni mesaj geldi bildirimi (üst bar rozeti). */

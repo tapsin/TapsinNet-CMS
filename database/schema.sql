@@ -446,6 +446,7 @@ CREATE TABLE IF NOT EXISTS comments (
     locale        TEXT    NOT NULL DEFAULT 'tr',
     is_approved   INTEGER NOT NULL DEFAULT 0,
     is_spam       INTEGER NOT NULL DEFAULT 0,
+    admin_note    TEXT,                        -- yönetici notu
     ip            TEXT,
     user_agent    TEXT,
     created_at    TEXT    NOT NULL DEFAULT (datetime('now')),

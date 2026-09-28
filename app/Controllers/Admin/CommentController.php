@@ -49,6 +49,8 @@ final class CommentController extends Controller
             case 'onaykaldir':Comment::setApproved($id, false); return $this->ok(t('admin.comment_unapproved'));
             case 'spam':      Comment::setSpam($id, true);     return $this->ok(t('admin.comment_spam'));
             case 'spamdegil': Comment::setSpam($id, false);    return $this->ok(t('admin.comment_unspammed'));
+            case 'not':       Comment::saveNote($id, (string) $this->request->post('admin_note', ''));
+                             return $this->ok(t('admin.note_saved'));
             case 'sil':       Comment::delete($id);            return $this->ok(t('admin.deleted', ['item' => '#' . $id]));
         }
 
