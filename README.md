@@ -69,10 +69,15 @@ ile referans verilir; ham OKLCH/hex şablonlarda bulunmaz.
 
 ```sh
 php tests/smoke.php            # 150 test — sözleşme, güvenlik, bütünlük
-bash tests/header-probe.sh     # headless tarayıcıda header ölçümü
-bash tests/contact-probe.sh    # iletişim ve yorum formu ölçümü
-bash tests/related-probe.sh    # ilgili içerikler bölümü denetimi
+bash tests/form-audit.sh        # her rota ve form ucu, gerçek DB yazımıyla
+bash tests/header-probe.sh      # headless tarayıcıda header ölçümü
+bash tests/contact-probe.sh     # iletişim ve yorum formu ölçümü
+bash tests/related-probe.sh     # ilgili içerikler bölümü denetimi
 ```
+
+`form-audit.sh` giriş yapar, her formu CSRF belirteciyle gerçekten gönderir,
+kaydın veritabanına düştüğünü doğrular ve test kayıtlarını siler. `smoke.php`
+veritabanını değiştirmez; ikisi de çalıştırmak güvenlidir.
 
 `smoke.php` veritabanını değiştirmez; çalıştırmak güvenlidir.
 

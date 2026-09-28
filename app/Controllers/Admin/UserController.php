@@ -33,7 +33,8 @@ final class UserController extends Controller
 
         $id    = (int) Auth::id();
         $name  = mb_substr(trim((string) $this->request->post('name', '')), 0, 160);
-        $email = mb_strtolower(trim((string) $this->request->post('email', '')), 0, 190);
+        // mb_strtolower YALNIZCA 2 argüman alır; uzunluk kısma mb_substr ile yapılır.
+        $email = mb_substr(mb_strtolower(trim((string) $this->request->post('email', ''))), 0, 190);
         // Kullanıcı adı isteğe bağlı: boş bırakılırsa yalnızca e-posta ile
         // girilir. Sadece harf, rakam, alt çizgi ve tire kabul edilir.
         $rawUser = trim((string) $this->request->post('username', ''));
