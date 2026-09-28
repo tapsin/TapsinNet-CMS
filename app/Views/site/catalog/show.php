@@ -237,13 +237,24 @@ $listName = $moduleName;
         <?php endif; ?>
 
         <!-- Önceki / sonraki -->
+        <?php
+        // KÖK NEDEN (düzeltildi): $currentPath detay yolunun KENDİSİDİR
+        // (ör. /hizmetler/sizma-testi-12). Üstüne slug eklenince iki
+        // segmentli (/hizmetler/a/b) bir yol üretiliyordu; bu rota yok,
+        // 404 dönüyordu. Doğru adres modül rotası + slug olmalı.
+        // Not: module_url()'in 2. parametresi slug değil, sorgu dizesidir.
+        $modRoute  = (string) (\Core\ModuleRegistry::route($module) ?? $module);
+        $langNow   = \Core\Translator::lang();
+        $langPre   = $langNow === (string) \Core\Config::get('i18n.default') ? '' : $langNow . '/';
+        $detailBase = '/' . $langPre . $modRoute;
+        ?>
         <?php if ($prev !== null || $next !== null): ?>
             <nav class="u-between hairline-stack" aria-label="<?= e(t('detail.prev_next')) ?>">
                 <?php if ($prev !== null): ?>
-                    <a href="<?= e(url($currentPath . '/' . $prev['slug'])) ?>" class="btn--quiet">← <?= e(str_limit(loc($prev, 'title') ?: ($prev['name'] ?? ''), 40)) ?></a>
+                    <a href="<?= e(url($detailBase . '/' . $prev['slug'])) ?>" class="btn--quiet">← <?= e(str_limit(loc($prev, 'title') ?: ($prev['name'] ?? ''), 40)) ?></a>
                 <?php else: ?><span></span><?php endif; ?>
                 <?php if ($next !== null): ?>
-                    <a href="<?= e(url($currentPath . '/' . $next['slug'])) ?>" class="btn--quiet"><?= e(str_limit(loc($next, 'title') ?: ($next['name'] ?? ''), 40)) ?> →</a>
+                    <a href="<?= e(url($detailBase . '/' . $next['slug'])) ?>" class="btn--quiet"><?= e(str_limit(loc($next, 'title') ?: ($next['name'] ?? ''), 40)) ?> →</a>
                 <?php endif; ?>
             </nav>
         <?php endif; ?>

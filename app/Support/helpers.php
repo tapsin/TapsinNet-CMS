@@ -204,6 +204,46 @@ if (!function_exists('module_url')) {
         $prefix = $lang === (string) Config::get('i18n.default') ? '' : $lang . '/';
         return rtrim((string) Config::get('app.url', ''), '/') . '/' . $prefix . $route . ($query ? '?' . http_build_query($query) : '');
     }
+
+    /**
+     * Bir kaydın detay URL'i — kart şablonlarının tek kaynağı.
+     *
+     * Neden var: kart şablonları yolu elle yazıyordu ve rota adlarıyla
+     * uyuşmuyordu ('/profil/x' yerine rotada '/profiller' vardı). Sonuç:
+     * her profil ve sertifika kartı 404'e düşüyordu. Rota config'den
+     * okunur, yol elle uydurulmaz.
+     *
+     * @return string|null slug yoksa veya modülün public rotası yoksa null
+     */
+    function item_url(string $module, array $row): ?string
+    {
+        $slug = trim((string) ($row['slug'] ?? ''));
+        $route = ModuleRegistry::route($module);
+        if ($slug === '' || $route === null) {
+            return null;
+        }
+        $lang = Translator::lang();
+        $prefix = $lang === (string) Config::get('i18n.default') ? '' : $lang . '/';
+        return rtrim((string) Config::get('app.url', ''), '/') . '/' . $prefix . $route . '/' . $slug;
+    }
+
+    /**
+     * Kartlarda detay bağlantısı basarken kullanılır.
+     *
+     * Detay sayfası olmayan kayıt (slug yok, ya da modülün public rotası
+     * tanımlı değil) için `href="#"` üretmek yanlıştı: boş ya da ölü
+     * bağlantı veriyordu. Bu durumda metin bağlantıya dönüşür — kart yine
+     * bilgi taşır, ama tıklanabilir olmayan bir şey gösterilmez.
+     *
+     * @return array{href: string|null, tag: string} hangi etiket basılacak
+     */
+    function card_link(string $module, array $row, string $class = ''): array
+    {
+        $href = item_url($module, $row);
+        return $href === null
+            ? ['href' => null, 'tag' => 'span']
+            : ['href' => $href, 'tag' => 'a'];
+    }
 }
 
 if (!function_exists('current_query')) {

@@ -8,7 +8,9 @@
     $cover = $row['cover_image'] ?? null;
     $pdf = $row['pdf_path'] ?? null;
     $verifyUrl = $row['verify_url'] ?? null;
-    $url = $row['slug'] ? url('/sertifika/' . $row['slug']) : '#';
+    // Yol config'deki rota adından gelir ('/sertifikalar'). Elle yazılan
+    // '/sertifika/' yolu rotada yoktu ve her sertifika kartı 404'e düşüyordu.
+    $url = item_url('certificates', $row);
     $glyph = $glyph ?? (module('certificates', 'glyph') ?? '◆');
 ?>
 <article class="card certificate-card">
@@ -23,7 +25,11 @@
     </div>
     <div class="card__body">
         <h3 class="card__title">
-            <a href="<?= e($url) ?>"><?= e($title) ?></a>
+            <?php if ($url): ?>
+                <a href="<?= e($url) ?>"><?= e($title) ?></a>
+            <?php else: ?>
+                <span><?= e($title) ?></span>
+            <?php endif; ?>
         </h3>
         <dl class="dl card__meta">
             <?php if ($issuer !== ''): ?>
@@ -53,7 +59,9 @@
         </dl>
     </div>
     <footer class="card__foot btn-row">
-        <a href="<?= e($url) ?>" class="btn btn--quiet"><?= t('home.view') ?></a>
+        <?php if ($url): ?>
+            <a href="<?= e($url) ?>" class="btn btn--quiet"><?= t('home.view') ?></a>
+        <?php endif; ?>
         <?php if ($pdf): ?>
             <a href="<?= e(upload_url($pdf)) ?>" class="btn btn--ghost" download><?= t('detail.download') ?></a>
         <?php endif; ?>

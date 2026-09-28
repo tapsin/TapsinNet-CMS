@@ -5,7 +5,9 @@
     $company = loc($row, 'company') ?: '';
     $bio = loc($row, 'bio') ?: '';
     $avatar = $row['avatar'] ?? null;
-    $url = $row['slug'] ? url('/profil/' . $row['slug']) : '#';
+    // Yol config'deki rota adından gelir ('/profiller'). Elle yazılan
+    // '/profil/' yolu rotada yoktu ve her profil kartı 404'e düşüyordu.
+    $url = item_url('profiles', $row);
     $glyph = $glyph ?? (module('profiles', 'glyph') ?? '◆');
 ?>
 <article class="card profile-card">
@@ -20,7 +22,11 @@
     </div>
     <div class="card__body">
         <h3 class="card__title">
-            <a href="<?= e($url) ?>"><?= e($name) ?></a>
+            <?php if ($url): ?>
+                <a href="<?= e($url) ?>"><?= e($name) ?></a>
+            <?php else: ?>
+                <span><?= e($name) ?></span>
+            <?php endif; ?>
         </h3>
         <?php if ($role !== ''): ?>
             <p class="card__meta u-muted"><?= e($role) ?></p>
@@ -33,6 +39,8 @@
         <?php endif; ?>
     </div>
     <footer class="card__foot">
-        <a href="<?= e($url) ?>" class="btn btn--quiet"><?= t('home.view') ?></a>
+        <?php if ($url): ?>
+            <a href="<?= e($url) ?>" class="btn btn--quiet"><?= t('home.view') ?></a>
+        <?php endif; ?>
     </footer>
 </article>

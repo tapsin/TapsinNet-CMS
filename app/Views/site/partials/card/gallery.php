@@ -3,7 +3,8 @@
     $title = loc($row, 'title') ?: '';
     $album = $row['album'] ?? '';
     $cover = $row['cover_image'] ?? null;
-    $url = $row['slug'] ? url('/galeri/' . $row['slug']) : '#';
+    // Yol config'deki rota adından gelir ('/galeri').
+    $url = item_url('gallery', $row);
     $glyph = $glyph ?? (module('gallery', 'glyph') ?? '◆');
 ?>
 <article class="card gallery-card">
@@ -18,7 +19,11 @@
     </div>
     <div class="card__body">
         <h3 class="card__title">
-            <a href="<?= e($url) ?>"><?= e($title) ?></a>
+            <?php if ($url): ?>
+                <a href="<?= e($url) ?>"><?= e($title) ?></a>
+            <?php else: ?>
+                <span><?= e($title) ?></span>
+            <?php endif; ?>
         </h3>
         <?php if ($album !== ''): ?>
             <p class="card__meta u-muted"><?= e($album) ?></p>

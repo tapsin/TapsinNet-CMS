@@ -4,7 +4,9 @@
     $album = $row['album'] ?? '';
     $duration = $row['duration'] ?? '';
     $cover = $row['cover_image'] ?? null;
-    $url = $row['slug'] ? url('/video/' . $row['slug']) : '#';
+    // Yol config'deki rota adından gelir ('/videolar'). Elle yazılan
+    // '/video/' yolu rotada yoktu.
+    $url = item_url('videos', $row);
     $glyph = $glyph ?? (module('videos', 'glyph') ?? '◆');
     $embedUrl = video_embed_url($row);
 ?>
@@ -33,7 +35,11 @@
     </div>
     <div class="card__body">
         <h3 class="card__title">
-            <a href="<?= e($url) ?>"><?= e($title) ?></a>
+            <?php if ($url): ?>
+                <a href="<?= e($url) ?>"><?= e($title) ?></a>
+            <?php else: ?>
+                <span><?= e($title) ?></span>
+            <?php endif; ?>
         </h3>
         <?php if ($album !== ''): ?>
             <p class="card__meta u-muted"><?= e($album) ?></p>
@@ -49,7 +55,9 @@
                 <?= t('detail.watch') ?>
             </button>
         <?php else: ?>
-            <a href="<?= e($url) ?>" class="btn btn--quiet btn--block"><?= t('home.view') ?></a>
+            <?php if ($url): ?>
+                <a href="<?= e($url) ?>" class="btn btn--quiet btn--block"><?= t('home.view') ?></a>
+            <?php endif; ?>
         <?php endif; ?>
     </footer>
 </article>
