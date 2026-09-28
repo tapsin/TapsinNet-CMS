@@ -74,6 +74,38 @@ final class SettingController extends Controller
             ],
         ],
 
+        'captcha' => [
+            'label' => 'admin.settings.captcha',
+            'icon'  => '◈',
+            'fields' => [
+                'captcha_mode' => [
+                    'type'    => 'select',
+                    'label'   => 'Koruma modu',
+                    'hint'    => 'Sistem içi: sunucuda basit bir soru sorar, reCAPTCHA gerektirmez. ' .
+                                 'reCAPTCHA: Google anahtarlarınızı girin, çok daha güçlü koruma sağlar. ' .
+                                 'Modülün kendisi /admin/moduller sayfasından da kapatılabilir.',
+                    'rules'   => 'nullable|string|max:20',
+                    'options' => [
+                        'off'       => 'Kapalı',
+                        'builtin'   => 'Sistem içi soru',
+                        'recaptcha' => 'Google reCAPTCHA v2',
+                    ],
+                ],
+                'captcha_recaptcha_site' => [
+                    'type'  => 'text',
+                    'label' => 'reCAPTCHA site anahtarı',
+                    'hint'  => 'google.com/recaptcha/admin — "Site anahtarı" değeri (6Lc… ile başlar).',
+                    'rules' => 'nullable|max:200',
+                ],
+                'captcha_recaptcha_secret' => [
+                    'type'  => 'secret',
+                    'label' => 'reCAPTCHA gizli anahtar',
+                    'hint'  => 'Aynı sayfadaki "Gizli anahtar". Formlarda ASLA gösterilmez.',
+                    'rules' => 'nullable|max:200',
+                ],
+            ],
+        ],
+
         'seo' => [
             'label' => 'admin.settings.seo',
             'icon'  => '◇',
@@ -134,6 +166,42 @@ final class SettingController extends Controller
                         Settings::set($key, null, null, 'image', $group);
                         $saved++;
                     }
+                    continue;
+                }
+
+                if ($type === 'secret') {
+                    // Form maskeli değer gönderir ("********") veya boş bırakır.
+                    // · maske geldiyse  → mevcut anahtar KORUNUR, kullanıcı yeni
+                    //   yazmadı demektir
+                    // · "sil" işaretliyse → anahtar silinir
+                    // · gerçek değer    → kaydedilir
+                    $incoming = trim((string) ($input[$key] ?? ''));
+                    $old      = (string) Settings::get($key, '');
+
+                    if ($this->request->bool('sil_' . $key)) {
+                        Settings::set($key, null, null, 'secret', $group);
+                        $saved++;
+                        continue;
+                    }
+                    if ($incoming === '' || $incoming === '********') {
+                        if ($old !== '') {
+                            $saved++;   // dokunulmadı, sayım için
+                        }
+                        continue;
+                    }
+                    Settings::set($key, $incoming, null, 'secret', $group);
+                    $saved++;
+                    continue;
+                }
+
+                if ($type === 'select') {
+                    $allowed = array_map('strval', array_keys((array) ($field['options'] ?? [])));
+                    $picked  = trim((string) ($input[$key] ?? 'off'));
+                    if (!in_array($picked, $allowed, true)) {
+                        $picked = 'off';
+                    }
+                    Settings::set($key, $picked, null, 'select', $group);
+                    $saved++;
                     continue;
                 }
 

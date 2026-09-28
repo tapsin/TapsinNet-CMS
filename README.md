@@ -49,6 +49,7 @@ bin/               console · serve · demo-images
 | Kullanıcı sızıntısı | Kullanıcı yoksa bile hash doğrulaması çalışır (timing) |
 | CSRF | Tüm POST formlarında zorunlu token |
 | Form bot tuzağı | Honeypot alanı + 2 saniyelik zaman tuzağı |
+| Form koruması | İletişim ve yorum formlarında: sistem içi soru **veya** Google reCAPTCHA v2; yönetim panelinden seçilir, modül tek düğmeyle kapatılır |
 | SQL | Tüm sorgular hazır ifade; kullanıcı girdisi yalnızca bağlanır |
 | Çıktı | `e()` varsayılan; `safe_html()` yalnızca ayarlanabilir alanlarda |
 | Depoya girmez | `.env`, `storage/database/*.sqlite`, yedekler, `*.zip` |
@@ -68,8 +69,9 @@ ile referans verilir; ham OKLCH/hex şablonlarda bulunmaz.
 ### Testleri çalıştırma
 
 ```sh
-php tests/smoke.php            # 150 test — sözleşme, güvenlik, bütünlük
+php tests/smoke.php            # 151 test — sözleşme, güvenlik, bütünlük
 bash tests/form-audit.sh        # her rota ve form ucu, gerçek DB yazımıyla
+bash tests/captcha-probe.sh     # form koruması: üç modun tamamı
 bash tests/header-probe.sh      # headless tarayıcıda header ölçümü
 bash tests/contact-probe.sh     # iletişim ve yorum formu ölçümü
 bash tests/related-probe.sh     # ilgili içerikler bölümü denetimi
@@ -359,6 +361,12 @@ veritabanı için dosya kopyalamak da yeterlidir (WAL dosyaları varsa
   noktadır.
 * **Ortam eşzamanlı yazma** — SQLite `busy_timeout` ile 5 saniyeye kadar
   bekler; yüksek eşzamanlı yazma için MySQL/PostgreSQL önerilir.
+* **Sistem içi form koruması zayıftır** — sunucuda GD olmadığı için captcha
+  görsel değil, okunabilir bir aritmetik sorusudur. Basit otomasyonlar bunu
+  çözebilir. Ciddi spam hedefliyorsanız reCAPTCHA modunu kullanın.
+* **reCAPTCHA ağ hatasında formu kilitlemez** — Google'a ulaşılamazsa
+  gönderim kabul edilir (kullanıcının mesajını kaybetmesin diye). Bu, korumanın
+  devre dışı kalabileceği tek noktadır; ağ hataları loglanır.
 
 ---
 

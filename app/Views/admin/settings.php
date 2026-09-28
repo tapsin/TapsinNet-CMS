@@ -69,6 +69,32 @@ $get = static function (string $key, string $lang) use ($values): string {
                                 <input type="file" id="s-<?= e($key) ?>" name="<?= e($key) ?>" class="input"
                                        accept="image/jpeg,image/png,image/webp,image/avif,image/gif" data-preview>
 
+                            <?php elseif ($type === 'select'): ?>
+                                <?php $options = (array) ($f['options'] ?? []); ?>
+                                <select id="s-<?= e($key) ?>" name="<?= e($key) ?>" class="select"
+                                        <?= $err ? 'aria-invalid="true"' : '' ?>>
+                                    <?php foreach ($options as $oVal => $oLabel): ?>
+                                        <option value="<?= e((string) $oVal) ?>" <?= $val === (string) $oVal ? 'selected' : '' ?>>
+                                            <?= e((string) $oLabel) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+
+                            <?php elseif ($type === 'secret'): ?>
+                                <?php /* Gizli anahtar maskelenir; boş bırakılırsa silinmez. */ ?>
+                                <input type="password" id="s-<?= e($key) ?>" name="<?= e($key) ?>"
+                                       class="input" autocomplete="off" spellcheck="false"
+                                       value="<?= $val !== '' ? '********' : '' ?>"
+                                       data-masked-secret
+                                       <?= $err ? 'aria-invalid="true"' : '' ?>>
+                                <?php if ($val !== ''): ?>
+                                    <p class="field__hint"><?= e(t('admin.secret_saved')) ?></p>
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="sil_<?= e($key) ?>" value="1">
+                                        <span><?= e(t('admin.delete')) ?></span>
+                                    </label>
+                                <?php endif; ?>
+
                             <?php elseif ($type === 'textarea'): ?>
                                 <?php if ($lang): ?>
                                     <div class="field__pair">

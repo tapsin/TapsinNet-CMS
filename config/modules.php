@@ -199,4 +199,20 @@ return [
         'group' => 'system',
         'icon_glyph' => '⌕',
     ],
+
+    // Form koruması — iletişim ve yorum gönderimlerinde.
+    // Kapalıyken Core\Captcha::mode() 'off' döner ve formlar korumasız çalışır.
+    // Mod seçimi (sistem içi / reCAPTCHA) ayarlar sekmesinden yapılır.
+    'captcha' => [
+        'name' => ['tr' => 'Form koruması', 'en' => 'Form protection'],
+        'desc' => ['tr' => 'İletişim ve yorum formlarında doğrulama', 'en' => 'Verification on contact and comment forms'],
+        'icon'  => 'shield',
+        'admin' => null,           // kendi ekranı yok; /admin/ayarlar?grup=captcha
+        'route' => null,           // public sayfası yok
+        'table' => null,
+        'show_home' => false,
+        'rail_limit' => null,
+        'group' => 'system',
+        'icon_glyph' => '◈',
+    ],
 ];

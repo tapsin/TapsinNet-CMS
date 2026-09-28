@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Controllers\Site;
 
 use Controllers\Controller;
+use Core\Captcha;
 use Core\Config;
 use Core\HttpException;
 use Core\Logger;
@@ -37,9 +38,26 @@ final class ContactController extends Controller
         ], 'layouts.site');
     }
 
-    public function submit(): Response
+    /**
+     * Form koruması sorusunu yeniler (sistem içi mod).
+     * JSON döner; sayfa yenilenmeden yeni soru gelir.
+     */
+    public function captcha(): Response
     {
-        \Core\Csrf::verifyOrFail($this->request);
+        $mode = Captcha::mode();
+        if ($mode === Captcha::MODE_BUILTIN) {
+            $q = Captcha::builtinQuestion();
+            return $this->json([
+                'mode' => Captcha::MODE_BUILTIN,
+                'text' => $q['text'],
+            ]);
+        }
+        // reCAPTCHA'da yenilemeye gerek yok; kapalıysa da yanıt boş.
+        return $this->json(['mode' => $mode, 'text' => '']);
+    }
+
+    public function submit(): Response
+    {        \Core\Csrf::verifyOrFail($this->request);
 
         $data = [
             'name'    => mb_substr(trim((string) $this->request->post('name', '')), 0, 160),
@@ -94,6 +112,14 @@ final class ContactController extends Controller
 
         if ($v->fails()) {
             return $this->withErrors($this->request->all(), $v->flatErrors());
+        }
+
+        // --- Form koruması --------------------------------------------------
+        // Alan doğrulamasından SONRA çalışır: kullanıcı önce kendi hatasını
+        // görsün, sonra captcha'yı doldursun. Aksi hâlde eksik alanı giderip
+        // captcha'yı tekrar çözmek zorunda kalırdı.
+        if (Captcha::verify($this->request) !== null) {
+            return $this->withErrors($this->request->all(), ['captcha' => t('captcha.error')]);
         }
 
         // --- Kayıt ----------------------------------------------------------

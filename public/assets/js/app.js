@@ -103,6 +103,36 @@
   }
 
   /* =====================================================================
+   *  1c · Form koruması — sistem içi soruyu yenile
+   * =================================================================== */
+  function captchaRefresh() {
+    all('[data-captcha-reload]').forEach(function (btn) {
+      on(btn, 'click', function () {
+        var wrap = btn.closest('.captcha');
+        var q = wrap ? one('.captcha__q', wrap) : null;
+        if (!q) { return; }
+
+        btn.classList.add('is-loading');
+        fetch(window.location.origin + '/captcha/yenile', {
+          headers: { 'Accept': 'application/json' },
+          credentials: 'same-origin'
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data && data.text) {
+              q.textContent = data.text;
+              var input = one('.captcha__input', wrap);
+              // eski cevap yeni soruya ait olmaz → temizle
+              if (input) { input.value = ''; input.focus(); }
+            }
+          })
+          .catch(function () { /* soru eskisiyle kalır, kullanıcı çözer */ })
+          .then(function () { btn.classList.remove('is-loading'); });
+      });
+    });
+  }
+
+  /* =====================================================================
    *  1 · Mobil menü
    * =================================================================== */
   function mobileMenu() {
@@ -468,6 +498,7 @@
 
     mobileMenu();
     dropdowns();
+    captchaRefresh();
     lightbox();
     videoModal();
     accordion();

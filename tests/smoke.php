@@ -53,7 +53,11 @@ function check(string $label, bool $ok, mixed $detail = ''): void
 section('Ortam ve yapılandırma');
 
 check('Config yüklendi', Config::get('app.name') !== null, (string) Config::get('app.name'));
-check('Modül kataloğu okundu', count(Config::get('modules', [])) === 14, count(Config::get('modules', [])) . ' modül');
+// Modül sayısı config/modules.php ile aynı kaynaktan gelir; sabit bir
+// sayı yazmak yeni modül eklenince testi kırar. Alt sınır konur.
+$moduleCount = count(Config::get('modules', []));
+check('Modül kataloğu okundu', $moduleCount >= 14, $moduleCount . ' modül');
+check('Form koruması modülü tanımlı', isset(Config::get('modules', [])['captcha']));
 check('Yerel ayarlar yüklendi', Translator::lang() === 'tr', Translator::lang());
 check('Çeviri çalışıyor', Translator::t('nav.projects') === 'İşler', Translator::t('nav.projects'));
 check('İngilizce çeviri çalışıyor', Translator::t('nav.projects', [], 'en') === 'Work', Translator::t('nav.projects', [], 'en'));

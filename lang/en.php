@@ -226,6 +226,15 @@ return [
         'details' => 'Technical details',
     ],
 
+    'captcha' => [
+        'question_label' => 'Verification question:',
+        'builtin_help'   => 'Type the answer. The submit button works 2 seconds after the question appears.',
+        'reload'         => 'New question',
+        'error'          => 'Verification failed. Please read the question again and answer.',
+        'noscript'       => 'JavaScript must be enabled for verification.',
+        'label'          => 'Form protection',
+    ],
+
     'validation' => [
         'required' => ':attribute is required.',
         'string'   => ':attribute must be text.',
@@ -349,6 +358,7 @@ return [
         'add'           => 'Add',
         'edit_button'   => 'Edit',
         'delete'        => 'Delete',
+        'secret_saved'  => 'Saved. Type a new key to change it; leaving it blank keeps the current one.',
         'preview'       => 'Preview',
         'actions'       => 'Actions',
         'search_ph'    => 'Search records…',
@@ -422,6 +432,7 @@ return [
         'settings.general' => 'General',
         'settings.home'    => 'Home page',
         'settings.contact' => 'Contact',
+        'settings.captcha' => 'Form protection',
         'settings.seo'     => 'SEO',
         'group'          => 'Group',
         'turkish'        => 'Turkish',

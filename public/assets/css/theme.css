@@ -1001,6 +1001,56 @@ pre {
   pointer-events: none;
 }
 
+/* --- Form koruması ------------------------------------------------------
+   Sistem içi modda soru metin olarak sorulur (sunucuda GD yok, resim
+   üretilemez). Bu erişilebilirlik açısından da üstündür: ekran okuyucu
+   soruyu okur. */
+.captcha { margin-bottom: var(--space-md); }
+.captcha__q {
+  display: inline-block;
+  margin-inline-start: var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semi);
+  letter-spacing: 0.08em;
+  color: var(--color-ink);
+}
+.captcha__row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-3xs);
+}
+.captcha__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 14rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+}
+.captcha__reload {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  padding: 0;
+  font-size: var(--text-md);
+  line-height: 1;
+  color: var(--color-ink-soft);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.captcha__reload:hover { color: var(--color-ink); border-color: var(--color-rule-strong); }
+.captcha__reload:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.captcha__reload.is-loading { opacity: 0.5; pointer-events: none; }
+/* reCAPTCHA kutusu form kenar boşluğuna taşmasın */
+.g-recaptcha { margin-bottom: var(--space-md); max-width: 100%; }
+
 .form-actions {
   display: flex;
   flex-wrap: wrap;

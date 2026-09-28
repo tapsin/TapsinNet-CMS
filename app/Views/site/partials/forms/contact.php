@@ -91,6 +91,8 @@
         <?php endif; ?>
     </div>
 
+    <?= partial('site.partials.forms.captcha') ?>
+
     <div class="form-actions">
         <button type="submit" class="btn btn--primary btn--block" data-submit-btn>
             <?= t('contact.submit') ?>

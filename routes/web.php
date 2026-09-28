@@ -32,6 +32,10 @@ $router->post('/iletisim', [ContactController::class, 'submit'], 'contact.submit
 // --- Yorumlar ---------------------------------------------------------------
 $router->post('/yorumlar', [CommentController::class, 'store'], 'comments.store');
 
+// --- Form koruması (captcha) -------------------------------------------------
+// Sistem içi modda yenileme düğmesi yeni soruyu buradan ister.
+$router->get('/captcha/yenile', [ContactController::class, 'captcha'], 'captcha.refresh');
+
 // --- Arama ------------------------------------------------------------------
 $router->get('/ara', [SearchController::class, 'index'], 'search');
 

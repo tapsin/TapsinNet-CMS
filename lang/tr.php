@@ -236,6 +236,16 @@ return [
         'details' => 'Teknik ayrıntı',
     ],
 
+    // ------------------------------------------------------------ form koruması
+    'captcha' => [
+        'question_label' => 'Doğrulama sorusu:',
+        'builtin_help'   => 'Cevabı yazın. Gönder butonu, soru gösterildikten en az 2 saniye sonra çalışır.',
+        'reload'         => 'Yeni soru',
+        'error'          => 'Doğrulama hatalı. Soruyu yeniden okuyup cevaplayın.',
+        'noscript'       => 'Doğrulama için JavaScript açık olmalı.',
+        'label'          => 'Form koruması',
+    ],
+
     // ------------------------------------------------------------ doğrulama
     'validation' => [
         'required' => ':attribute alanı zorunludur.',
@@ -364,6 +374,7 @@ return [
         'add'           => 'Ekle',
         'edit_button'   => 'Düzenle',
         'delete'        => 'Sil',
+        'secret_saved'  => 'Kayıtlı. Değiştirmek için yeni anahtar yazın; boş bırakırsanız korunur.',
         'preview'       => 'Önizle',
         'actions'       => 'İşlemler',
         'search_ph'    => 'Kayıtlarda ara…',
@@ -437,6 +448,7 @@ return [
         'settings.general' => 'Genel',
         'settings.home'    => 'Ana sayfa',
         'settings.contact' => 'İletişim',
+        'settings.captcha' => 'Form koruması',
         'settings.seo'     => 'SEO',
         'group'          => 'Grup',
         'turkish'        => 'Türkçe',

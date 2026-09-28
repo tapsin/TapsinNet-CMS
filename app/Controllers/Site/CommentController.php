@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Controllers\Site;
 
 use Controllers\Controller;
+use Core\Captcha;
 use Core\Csrf;
 use Core\Logger;
 use Core\ModuleRegistry;
@@ -66,6 +67,12 @@ final class CommentController extends Controller
 
         if ($errors !== []) {
             return $this->withErrors($this->request->all(), $errors, '#comments');
+        }
+
+        // Form koruması — alan hataları geçildikten sonra sorulur, aynı
+        // iletişim formundaki gibi: kullanıcı önce kendi hatasını görür.
+        if (Captcha::verify($this->request) !== null) {
+            return $this->withErrors($this->request->all(), ['captcha' => t('captcha.error')], '#comments');
         }
 
         // Aynı IP'den aynı içeriğe 24 saat içinde ikinci yorum engellenir
