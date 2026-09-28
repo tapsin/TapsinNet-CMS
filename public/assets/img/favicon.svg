@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TapsinNet">
+  <rect width="64" height="64" fill="#f6f1e7"/>
+  <rect x="6" y="6" width="52" height="52" fill="none" stroke="#c05a1e" stroke-width="3"/>
+  <path d="M20 44V20h6l12 16V20h6v24h-6L26 28v16z" fill="#211a12"/>
+</svg>

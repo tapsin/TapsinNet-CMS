@@ -1,0 +1,6 @@
+{
+  "files": ["app/Views/layouts/site.php", "app/Views/layouts/admin.php", "app/Views/layouts/minimal.php", "app/Views/admin/auth/login.php"],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "cspChecked": true
+}

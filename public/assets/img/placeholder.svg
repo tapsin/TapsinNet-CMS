@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Görsel yer tutucu">
+  <rect width="800" height="600" fill="#efe8dc"/>
+  <g fill="none" stroke="#c8bda9" stroke-width="2">
+    <rect x="24" y="24" width="752" height="552"/>
+    <path d="M24 504l180-180 120 120 96-96 200 200"/>
+  </g>
+  <circle cx="620" cy="150" r="34" fill="none" stroke="#c8bda9" stroke-width="2"/>
+  <text x="400" y="320" font-family="Georgia, serif" font-size="22" fill="#a89a83" text-anchor="middle">Görsel bekleniyor</text>
+</svg>

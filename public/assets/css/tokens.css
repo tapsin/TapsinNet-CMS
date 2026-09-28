@@ -1,0 +1,193 @@
+/* ============================================================================
+ *  TapsinNet — TASARIM SİSTEMİ / TOKEN KATMANI
+ *  Hallmark · pre-emit critique: P5 H4 E4 S5 R5 V4
+ *  Hallmark · genre: editorial · macrostructure: 20 Ecosystem Index
+ *  theme: Atelier · enrichment: none (typography-only) · nav: N6 masthead
+ *  footer: Ft1 · axes: light paper / high-contrast-serif / warm ochre accent
+ * ----------------------------------------------------------------------------
+ *  DERS TOKENLARI. Bu dosya tek gerçek kaynaktır: ne theme.css ne de şablonlar
+ *  ham OKLCH/hex yazabilir. Bir değere ihtiyaç duyarsanız ÖNCE buraya yeni bir
+ *  isimli token olarak ekleyin, sonra var(--token) ile referans verin.
+ *  3 aile tavanı: Fraunces (display) · IBM Plex Sans (body) · JetBrains Mono
+ *  (outlier — yalnızca 2 yerde: masthead logotype + hero rakamı).
+ * ========================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------- RENK
+     Katman 1 · Kağıt (temel yüzey) — sıcak krem, saf beyaz DEĞİL
+     Katman 2 · Mürekkep (birincil metin)
+     Katman 3 · Nötrler (5 adım, hepsi sıcak eksende tonlanmış)
+     Katman 4 · Vurgu (tek renk, viewport'ta ≤ %3) */
+  --color-paper:        oklch(97%    0.008 70);
+  --color-paper-2:      oklch(94.5%  0.010 70);
+  --color-paper-3:      oklch(91%    0.012 68);
+  --color-paper-inset:  oklch(93.5%  0.011 72);
+
+  --color-rule:         oklch(85%    0.010 70);
+  --color-rule-strong:  oklch(77%    0.013 66);
+  --color-rule-faint:   oklch(90%    0.008 72);
+
+  --color-ink:          oklch(21%    0.014 55);
+  --color-ink-soft:     oklch(33%    0.012 58);
+  --color-ink-muted:    oklch(44%    0.010 62);
+  --color-ink-faint:    oklch(56%    0.009 64);
+  --color-ink-invert:   oklch(97%    0.008 70);
+
+  /* Vurgu — okşer/kiremit. -ink varyantı KAĞIT ÜZERİNDE METİN için
+     (kontrast ≈ 4.9:1); ham --color-accent yalnızca büyük punto,
+     işaret, kenarlık ve koyu zemin üzerinde kullanılır. */
+  --color-accent:       oklch(56%    0.145 48);
+  --color-accent-ink:   oklch(44%    0.130 45);
+  --color-accent-deep:  oklch(34%    0.105 42);
+  --color-accent-soft:  oklch(92%    0.038 62);
+  --color-accent-wash:  oklch(96.5%  0.018 66);
+  --color-on-accent:    oklch(98%    0.006 70);
+
+  /* Koyu yüzeyler (hero, koyu footer, modal) */
+  --color-dark:         oklch(19%    0.014 55);
+  --color-dark-2:       oklch(23%    0.015 55);
+  --color-dark-rule:    oklch(34%    0.014 55);
+  --color-dark-ink:     oklch(95%    0.008 70);
+  /* Koyu yüzey üstü yarı saydam katmanlar (lightbox, video oynatıcı) */
+  --color-dark-a12:    oklch(19%    0.014 55 / 0.12);
+  --color-dark-a35:    oklch(19%    0.014 55 / 0.35);
+  --color-dark-a60:    oklch(19%    0.014 55 / 0.60);
+  --color-dark-a85:    oklch(19%    0.014 55 / 0.85);
+  --color-dark-a92:    oklch(19%    0.014 55 / 0.92);
+  --color-dark-muted:   oklch(76%    0.010 66);
+
+  /* Durum renkleri — asla tek sinyal olarak kullanılmaz, ikon/etiket eşlik eder */
+  --color-success:      oklch(48%    0.115 150);
+  --color-success-soft: oklch(94%    0.030 150);
+  --color-danger:       oklch(48%    0.160 25);
+  --color-danger-soft:  oklch(94%    0.035 25);
+  --color-warning:      oklch(58%    0.130 75);
+  --color-warning-soft: oklch(95%    0.040 80);
+  --color-info:         oklch(48%    0.110 240);
+  --color-info-soft:    oklch(94%    0.028 240);
+
+  --color-focus:        oklch(50%    0.160 45);
+  --color-selection:    oklch(88%    0.060 60);
+  --color-selection-ink: oklch(21%   0.014 55);
+
+  /* Gölge — yumuşak, sıcak, düşük opaklık. Editorial: gölge minimumda. */
+  --shadow-xs: 0 1px 2px oklch(21% 0.014 55 / 0.05);
+  --shadow-sm: 0 2px 6px oklch(21% 0.014 55 / 0.06), 0 1px 2px oklch(21% 0.014 55 / 0.04);
+  --shadow-md: 0 6px 20px oklch(21% 0.014 55 / 0.08), 0 2px 6px oklch(21% 0.014 55 / 0.04);
+  --shadow-lg: 0 18px 48px oklch(21% 0.014 55 / 0.12), 0 4px 12px oklch(21% 0.014 55 / 0.05);
+  --shadow-none: none;
+
+  /* ------------------------------------------------------------ TİPOGRAFİ */
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-body:    "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --weight-light:  300;
+  --weight-regular:400;
+  --weight-medium: 500;
+  --weight-semi:   600;
+  --weight-bold:   700;
+  /* Başlık gövdeden EN AZ 300 birim ağır olmalı (400 → 700) */
+  --weight-display: 600;
+
+  --leading-tight:   1.08;   /* display */
+  --leading-snug:    1.28;   /* başlıklar */
+  --leading-normal:  1.62;   /* gövde */
+  --leading-loose:   1.78;   /* uzun metin */
+
+  --tracking-display: -0.022em;
+  --tracking-tight:   -0.012em;
+  --tracking-normal:  0;
+  --tracking-label:   0.12em;  /* üst etiketler / small-caps */
+
+  --measure:  65ch;   /* satır uzunluğu 45–75 karakter */
+  --measure-narrow: 48ch;
+
+  /* 1.25 (major third) oranı, 16px gövdeden */
+  --text-xs:      0.8rem;
+  --text-sm:      0.875rem;
+  --text-base:    1rem;
+  --text-md:      1.125rem;
+  --text-lg:      1.4063rem;
+  --text-xl:      1.7578rem;
+  --text-2xl:     2.1973rem;
+  --text-3xl:     2.7466rem;
+  --text-4xl:     3.4332rem;
+  --text-display: clamp(2.75rem, 5vw + 1rem, 5.25rem);
+  --text-display-s: clamp(2rem, 3.2vw + 0.75rem, 3.5rem);
+
+  /* --------------------------------------------------------------- BOŞLUK
+     4pt tabanlı ölçek. Bölümler arası en az --space-2xl. */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs:  0.75rem;
+  --space-sm:  1rem;
+  --space-md:  1.5rem;
+  --space-lg:  2rem;
+  --space-xl:  3rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 8rem;
+
+  /* Yerleşim */
+  --container:        76rem;   /* 1216px — okunabilir genişlik */
+  --container-narrow:  56rem;
+  --container-wide:   88rem;
+  --gutter:           clamp(1.25rem, 4vw, 2.5rem);
+  --masthead-h:       3.5rem;
+  --sidebar-w:        16rem;
+
+  /* --------------------------------------------------------------- KÖŞE */
+  /* Editorial: keskin, neredeyse köşesiz. Yuvarlaklık kontrollerde 2px. */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-pill: 999px;
+  --radius-none: 0;
+
+  /* -------------------------------------------------------------- HAREKET
+     Yalnızca transform ve opacity. Sıçrama/overshoot UI durumunda YASAK.
+     prefers-reduced-motion altında 150ms opaklık geçişine çöker. */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --dur-instant: 80ms;
+  --dur-fast:    140ms;
+  --dur-base:    220ms;
+  --dur-slow:    340ms;
+  --dur-page:    420ms;
+
+  /* -------------------------------------------------------------- KATMAN */
+  --z-base:    0;
+  --z-raised:  10;
+  --z-sticky:  100;
+  --z-nav:     200;
+  --z-overlay: 300;
+  --z-modal:   400;
+  --z-toast:   500;
+
+  /* ------------------------------------------------------------ KATMANLAR
+     Ritim için yarım adımlık sınırlar — ızgara boşluklarını hizalı tutar. */
+  --layer-hairline: 1px;
+  --layer-thick:    3px;
+}
+
+/* ---------------------------------------------------------------------------
+ *  KOYU YÜZEY TİPİNİ ALAN
+ *  Tema tek moddur; koyu yalnızca hero, footer ve modal gibi koyu bileşenlerde
+ *  kullanılır. Tema değiştirmek isteyenler buradaki grubu değiştirir.
+ * ------------------------------------------------------------------------ */
+.on-dark {
+  background: var(--color-dark);
+  color: var(--color-dark-ink);
+}
+.on-dark h1, .on-dark h2, .on-dark h3, .on-dark h4 {
+  color: var(--color-dark-ink);
+}
+.on-dark .muted,
+.on-dark .text-muted { color: var(--color-dark-muted); }
+.on-dark .rule { border-color: var(--color-dark-rule); }
+.on-dark a { color: var(--color-accent); }
+.on-dark a:hover { color: var(--color-accent-soft); }

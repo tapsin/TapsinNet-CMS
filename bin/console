@@ -1,0 +1,626 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+/**
+ * TapsinNet konsol aracı
+ *
+ *   php bin/console install              kurulum + admin hesabı
+ *   php bin/console migrate             şemayı uygular (idempotent)
+ *   php bin/console seed                 örnek içerik yükler
+ *   php bin/console admin:create         yeni yönetici oluşturur
+ *   php bin/console modules [--on|--off=slug]  modül durumu
+ *   php bin/console optimize             sqlite bakımı (VACUUM/ANALYZE)
+ *   php bin/console backup               veritabanı yedeği
+ *   php bin/console check                ortam ve yapılandırma kontrolü
+ */
+
+if (PHP_SAPI !== 'cli') {
+    exit("Bu araç yalnızca komut satırından çalışır.\n");
+}
+
+require dirname(__DIR__) . '/bootstrap/app.php';
+
+use Core\Config;
+use Core\Database;
+use Core\Application;
+use Core\Auth;
+use Core\ModuleRegistry;
+use Core\Model;
+use Models\{User, Module, Settings, Service, Project, Certificate, GalleryItem, Video, News,
+             Profile, Testimonial, FaqItem, SocialPost, Page};
+
+$command = $argv[1] ?? 'help';
+$args    = array_slice($argv, 2);
+
+function out(string $m = ''): void { echo $m . PHP_EOL; }
+function ok(string $m): void    { echo "  ✓ " . $m . PHP_EOL; }
+function fail(string $m): void  { echo "  ✗ " . $m . PHP_EOL; }
+function step(string $m): void  { echo PHP_EOL . "▸ " . $m . PHP_EOL; }
+function head(string $m): void  { echo PHP_EOL . "\033[1m" . $m . "\033[0m" . PHP_EOL; }
+
+/** .env dosyasını üretir. */
+function writeEnv(string $name, string $url, string $env, string $debug, bool $secure): int
+{
+    $path = Application::basePath('.env');
+    $key  = 'base64:' . base64_encode(random_bytes(32));
+
+    $content = <<<ENV
+APP_NAME="$name"
+APP_ENV=$env
+APP_DEBUG=$debug
+APP_URL=$url
+APP_TIMEZONE=Europe/Istanbul
+APP_KEY="$key"
+
+APP_LOCALE=tr
+APP_FALLBACK_LOCALE=tr
+
+DB_DATABASE=
+DB_JOURNAL_MODE=WAL
+DB_SYNCHRONOUS=NORMAL
+DB_FOREIGN_KEYS=true
+
+APP_PER_PAGE=9
+ADMIN_PER_PAGE=20
+HOME_RAIL_LIMIT=5
+
+SESSION_NAME=tapsinnet_sid
+SESSION_SECURE=$secure
+SESSION_LIFETIME=7200
+TRUST_PROXY=false
+HSTS=
+CSP_UPGRADE=false
+
+ENV;
+
+    if (is_file($path)) {
+        $backup = $path . '.bak-' . date('Ymd-His');
+        copy($path, $backup);
+        out("  ! Mevcut .env yedeklendi: " . basename($backup));
+    }
+
+    return file_put_contents($path, $content);
+}
+
+/** Şemayı uygular. */
+function migrate(bool $fresh = false): void
+{
+    $db = Database::connection();
+
+    if ($fresh) {
+        $tables = $db->query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")->fetchAll();
+        $db->exec('PRAGMA foreign_keys = OFF');
+        foreach ($tables as $t) {
+            $db->exec('DROP TABLE IF EXISTS "' . $t['name'] . '"');
+        }
+        $db->exec('PRAGMA foreign_keys = ON');
+        out("  · Mevcut tablolar temizlendi.");
+    }
+
+    $sql  = file_get_contents(Application::basePath('database/schema.sql'));
+    $db->exec($sql);
+
+    $tables = $db->query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")->fetchAll();
+    ok(count($tables) . ' tablo hazır: ' . implode(', ', array_column($tables, 'name')));
+
+    Model::flushColumnCache();
+}
+
+/** Modül kayıtlarını config ile eşitler. */
+function syncModules(): void
+{
+    $existing = [];
+    foreach (Database::select('SELECT slug FROM modules') as $r) {
+        $existing[(string) $r['slug']] = true;
+    }
+
+    $order = 0;
+    foreach (Config::get('modules', []) as $slug => $def) {
+        if (!isset($existing[$slug])) {
+            Database::execute(
+                'INSERT INTO modules (slug, is_active, sort_order, created_at, updated_at)
+                 VALUES (:s, 1, :o, :c, :u)',
+                ['s' => $slug, 'o' => $order, 'c' => now(), 'u' => now()]
+            );
+        } else {
+            Database::execute('UPDATE modules SET sort_order = :o WHERE slug = :s', ['o' => $order, 's' => $slug]);
+        }
+        $order++;
+    }
+    ok(count(Config::get('modules', [])) . ' modül kaydı hazır.');
+    ModuleRegistry::flush();
+}
+
+/** Ayar şeması. */
+function defaultSettings(): array
+{
+    return [
+        ['site_name', 'TapsinNet', 'TapsinNet', 'text', 'general'],
+        ['site_tagline', 'Freelance web & yazılım', 'Freelance web & software', 'text', 'general'],
+        ['site_description', 'Marka sitesi, kurumsal web sitesi, özel yazılım ve bakım hizmetleri.', 'Brand sites, corporate web builds, custom software and maintenance.', 'textarea', 'general'],
+        ['home_hero_eyebrow', 'Freelance · Web · Yazılım', 'Freelance · Web · Software', 'text', 'home'],
+        ['home_hero_title', 'İşi, sözleşmede yazan şey yapar.', 'Work that does what the contract says.', 'text', 'home'],
+        ['home_hero_text', 'Marka sitesi, kurumsal web sitesi, özel yazılım ve bakım. Ölçülebilir sonuç, anlaşılır süreç.', 'Brand sites, corporate web builds, custom software and maintenance. Measurable results, a process you can follow.', 'textarea', 'home'],
+        ['home_cta_text', 'Projeni anlat', 'Start a project', 'text', 'home'],
+        ['home_cta2_text', 'İşlerime bak', 'See the work', 'text', 'home'],
+        ['home_about_title', 'Nasıl çalışırım', 'How I work', 'text', 'home'],
+        ['home_about_text', "Kısa tanışma, net kapsam, yazılı teklif.\n\nÖnce ne yapılacağını yazılı hale getiririm; sonra tarihleri birlikte belirleriz. Süreç boyunca haftalık tek satırlık durum veriyorum — sürpriz yok, sürpriz de yok.\n\nİş bittiğinde kod, dokümantasyon ve teslim sizin. Bir sonraki güncellemede ne yapacağımı önceden söylerim.", "Short intro, clear scope, written proposal.\n\nFirst I write down exactly what will be built, then we agree the dates together. You get a one-line status every week — no surprises, because there is nothing to be surprised about.\n\nWhen the work is done, the code, the documentation and the handover are yours. Before the next update I tell you what I will do.", 'textarea', 'home'],
+        ['contact_intro', 'Projenizi anlatın; kapsam, süre ve fiyat teklifini işe başladıktan sonraki gün içinde iletelim.', 'Tell me about the project. You will get scope, timeline and a quote the next working day.', 'textarea', 'contact'],
+        ['contact_kvkk_text', 'Bu form aracılığıyla paylaştığınız ad, e-posta, telefon ve mesaj bilgileri yalnızca size dönüş yapabilmek amacıyla işlenir, üçüncü taraflarla paylaşılmaz ve iletişim süreci sona erdiğinde silinir.', 'The name, email, phone and message you share through this form are processed solely in order to reply to you. They are not shared with third parties and are deleted once the contact process ends.', 'textarea', 'contact'],
+        ['contact_success_text', 'Mesajınız iletildi. En kısa sürede dönüş yapacağım.', 'Message received. I will get back to you shortly.', 'textarea', 'contact'],
+        ['meta_title', 'TapsinNet — Freelance Web & Yazılım', 'TapsinNet — Freelance Web & Software', 'text', 'seo'],
+        ['meta_description', 'Marka sitesi, kurumsal web sitesi, özel yazılım ve bakım hizmetleri.', 'Brand sites, corporate web builds, custom software and maintenance.', 'textarea', 'seo'],
+        ['meta_keywords', 'freelance web yazılım, web sitesi tasarımı, özel yazılım', 'freelance web software, website design, custom software', 'text', 'seo'],
+        ['show_index', '1', '1', 'bool', 'seo'],
+        ['working_hours', 'Hafta içi 09:00 – 19:00 (GMT+3)', 'Weekdays 09:00 – 19:00 (GMT+3)', 'text', 'general'],
+    ];
+}
+
+function seedSettings(): void
+{
+    $n = 0;
+    foreach (defaultSettings() as [$key, $tr, $en, $type, $group]) {
+        $exists = Database::value('SELECT COUNT(*) FROM settings WHERE key = :k', ['k' => $key], 0);
+        if ((int) $exists === 0) {
+            Settings::set($key, $tr, $en, $type, $group);
+            $n++;
+        }
+    }
+    ok($n . ' ayar eklendi.');
+}
+
+/** Örnek içerik. */
+function seedContent(): void
+{
+    $now = now();
+
+    if ((int) Project::countWhere() === 0) {
+        $items = [
+            ['Kurumsal site yenilemesi', 'Kuzey Sigorta', 'web', 'WordPress, PHP, MySQL', '2025-11', 1],
+            ['E-ticaret katalog uygulaması', 'Moda Dünyası', 'app', 'Laravel, Redis, Vue', '2025-06', 1],
+            ['Marka kimliği ve web sitesi', 'Çınar Kafe', 'marka', 'Figma, Astro', '2024-12', 1],
+            ['Randevu sistemi', 'Dent Nova', 'app', 'Laravel, Alpine.js', '2024-08', 0],
+            ['SEO ve içerik mimarisi', 'TeknoBülten', 'seo', 'Ahrefs, Schema.org', '2024-03', 0],
+            ['Kurumsal panel geliştirmesi', 'Anadolu Lojistik', 'app', 'Laravel, Livewire', '2023-11', 0],
+        ];
+        foreach ($items as $i => [$title, $client, $cat, $stack, $date, $featured]) {
+            Project::create([
+                'title_tr'     => $title,
+                'summary_tr'   => $client . ' için yürütülen proje. Kapsam, süreç ve sonuçlar bu sayfada.',
+                'client'       => $client,
+                'category'     => $cat,
+                'tech_stack'   => $stack,
+                'project_date' => $date,
+                'completed_at' => $date . '-01',
+                'body_tr'      => '<h2>Zorluk</h2><p>Mevcut altyapı ölçeklenmiyordu ve içerik güncellemesi teknik bilgi gerektiriyordu.</p><h2>Yaklaşım</h2><p>Önce ölçüm, sonra mimari karar. Her adım ölçülebilir bir çıktıya bağlandı.</p><h2>Sonuç</h2><p>Kabul kriterlerinin tamamı ilk sürümde karşılandı.</p>',
+                'is_featured'  => $featured,
+                'is_active'    => 1,
+                'sort_order'   => $i,
+                'created_at'   => date('Y-m-d H:i:s', strtotime("-" . ($i * 9 + 3) . " days")),
+            ]);
+        }
+        ok(count($items) . ' iş eklendi.');
+    }
+
+    if ((int) Service::countWhere() === 0) {
+        $items = [
+            ['Web sitesi tasarımı ve geliştirmesi', '◆', 'Responsive, hızlı, erişilebilir. 2–4 hafta.', 'Tasarım + geliştirme + yayın', '8 haftadan kısa sürede yayına alınır, mobil öncelikli çalışır.', 'Tasarım, geliştirme, yayın, 1 ay destek'],
+            ['Özel yazılım geliştirme', '⬢', 'İşinize özel panel, API ve entegrasyon.', 'Analiz + geliştirme + teslim', 'Hazır kalıplar değil, ihtiyaca göre yazılmış çözüm. Kod sizin.', 'Analiz, mimari, geliştirme, dokümantasyon, teslim'],
+            ['Bakım ve destek', '●', 'Aylık bakım, güncelleme ve izleme.', 'Bakım paketi', 'Yayındaki sistemleriniz güncel ve hızlı kalır.', 'Güncelleme, yedek, izleme, aylık rapor'],
+            ['SEO ve performans', '❖', 'Teknik SEO, hız, erişilebilirlik.', 'Teknik denetim + uygulama', 'Ölçülebilir iyileşme, tahmin değil ölçüm.', 'Denetim, önceliklendirme, uygulama, rapor'],
+            ['Marka ve grafik tasarım', '■', 'Logo, kurumsal kimlik, arayüz tasarımı.', 'Marka paketi', 'Dijital ürününüzle aynı dili konuşan görsel kimlik.', 'Logo, palet, tipografi, kullanım kılavuzu'],
+            ['E-ticaret kurulumu', '✦', 'Katalog, ödeme, kargo entegrasyonu.', 'Mağaza kurulumu', 'Ödeme alınabilir, yönetilebilir bir mağaza.', 'Mağaza, ödeme, kargo, eğitim'],
+        ];
+        foreach ($items as $i => [$title, $icon, $short, $unit, $desc, $deliverables]) {
+            Service::create([
+                'title_tr'        => $title,
+                'excerpt_tr'      => $short,
+                'icon'            => $icon,
+                'duration'        => $unit,
+                'body_tr'         => $desc,
+                'deliverables_tr' => $deliverables,
+                'is_active'       => 1,
+                'sort_order'      => $i,
+                'created_at'      => date('Y-m-d H:i:s', strtotime('-' . ($i * 6 + 2) . ' days')),
+            ]);
+        }
+        ok(count($items) . ' hizmet eklendi.');
+    }
+
+    if ((int) Certificate::countWhere() === 0) {
+        $items = [
+            ['Google Analytics 4', 'Google', '2025-01-15', null, null],
+            ['Meta Blueprint', 'Meta', '2024-09-10', '2026-09-09', null],
+            ['SEO Uluslararası', 'Dijital Pazarlama Kurumu', '2024-04-22', '2027-04-21', '92/100'],
+            ['PHP İleri Seviye', 'Türk Bilişim Derneği', '2023-11-05', null, null],
+        ];
+        foreach ($items as $i => [$title, $issuer, $issue, $expiry, $score]) {
+            Certificate::create([
+                'title_tr'     => $title,
+                'issuer'       => $issuer,
+                'issuer_tr'    => $issuer,
+                'issue_date'   => $issue,
+                'expiry_date'  => $expiry,
+                'score'        => $score,
+                'is_active'    => 1,
+                'sort_order'   => $i,
+                'created_at'   => date('Y-m-d H:i:s', strtotime('-' . ($i * 20) . ' days')),
+            ]);
+        }
+        ok(count($items) . ' sertifika eklendi.');
+    }
+
+    if ((int) Testimonial::countWhere() === 0) {
+        $items = [
+            ['Elif Demir', 'Pazarlama Müdürü', 'Kuzey Sigorta', 'Teslim tarihi ikinci haftaya kısaldı. Beklediğimizden hızlı ve çok daha temiz bir sonuç çıktı.'],
+            ['Murat Kaya', 'Kurucu', 'Çınar Kafe', 'Web sitemiz artık menüyü doğru gösteriyor ve telefon trafiğimiz ciddi şekilde arttı.'],
+            ['Selin Aksoy', 'Operasyon Sorumlusu', 'Anadolu Lojistik', 'Paneli kendi ekibimiz kullansa da öğrenme süresi bir günü geçmedi.'],
+        ];
+        foreach ($items as $i => [$name, $title, $company, $quote]) {
+            Testimonial::create([
+                'author_name'    => $name,
+                'author_title'   => $title,
+                'author_company' => $company,
+                'quote_tr'       => $quote,
+                'rating'         => 5,
+                'is_active'      => 1,
+                'sort_order'     => $i,
+                'created_at'     => date('Y-m-d H:i:s', strtotime('-' . ($i * 12) . ' days')),
+            ]);
+        }
+        ok(count($items) . ' referans eklendi.');
+    }
+
+    if ((int) FaqItem::countWhere() === 0) {
+        $items = [
+            ['Bir proje ne kadar sürer?', 'Kapsam netleştiğinde süre bellidir. Küçük bir kurumsal site genellikle 3–5 hafta, özel yazılım ise analiz sonrası netleşir. Teklifte süre yazılı olarak verilir.', 'Genel'],
+            ['Fiyatlandırmayı nasıl yapıyorsunuz?', 'Kapsam kalemlerine göre sabit fiyat veriyorum. Saatlik çalışmıyorum — saatlik çalışma kapsamı kayar demektir. Web siteleri için giriş seviyesi bir fiyat, kurumsal projeler için kapsama göre teklif veriyorum.', 'Genel'],
+            ['Kod ve tasarım bana ait mi?', 'Evet. Teslimde kaynak kod, dokümantasyon ve gerekiyorsa tasarım dosyaları size teslim edilir. Hiçbir altyapıya bağımlı değilsiniz.', 'Teslimat'],
+            ['Siteyi kendim güncelleyebilir miyim?', 'Evet. Panelde içerikleri kendiniz yönetebilirsiniz. Devralma eğitimi teslimat kapsamındadır.', 'Teslimat'],
+            ['Sunucu değişikliği yapabilir misiniz?', 'Evet, mevcut sunucunuzdan yeni sunucunuza taşıma dahil edilebilir. Taşıma sonrası bağlantılar ve yönlendirmeler kontrol edilir.', 'Teknik'],
+            ['Bakım zorunlu mu?', 'Hayır. Site teslimden sonra kendi başına çalışır. Aylık bakım paketi isteğe bağlıdır; güncelleme, yedekleme ve izleme kapsar.', 'Bakım'],
+        ];
+        foreach ($items as $i => [$q, $a, $cat]) {
+            FaqItem::create([
+                'question_tr' => $q,
+                'answer_tr'   => $a,
+                'category'    => $cat,
+                'is_active'   => 1,
+                'sort_order'  => $i,
+                'created_at'  => date('Y-m-d H:i:s', strtotime('-' . ($i * 5) . ' days')),
+            ]);
+        }
+        ok(count($items) . ' SSS eklendi.');
+    }
+
+    if ((int) News::countWhere() === 0) {
+        $items = [
+            ['Yeni site 3 haftada yayında', 'Süreç', 'Web sitesi teslim süresi gerçekten 3 haftada olabiliyor mu? Sürecin hangi adımlardan geçtiğini ve nerede zaman kazandırdığımı anlatıyorum.', 'Ölçüm → mimari → tasarım → geliştirme → içerik → yayın. Her adımın çıktısı tanımlı; onay bekleyen adım sayısı sabit.'],
+            ['Hız neden bir tasarım tercihidir', 'Performans', 'Core Web Vitals sayıları, kullanıcı davranışını doğrudan etkiliyor. Aşağıdaki ölçümler gerçek projelerden.', 'Font yerel sunucudan, görseller modern formatta ve boyutlandırılmış, JavaScript minimumda. Sunucu tarafı önbellek açık.'],
+            ['Teklif alırken ne sormalısınız', 'Rehber', 'Müşteriler en çok fiyatı soruyor; asıl önemli olan kapsamın netliği. Beş soru, teklif kalitesini belirler.', 'Kapsam, süre, kim karar veriyor, içerik kim sağlıyor, bakım kime düşüyor?'],
+        ];
+        foreach ($items as $i => [$title, $cat, $summary, $body]) {
+            News::create([
+                'title_tr'     => $title,
+                'summary_tr'   => $summary,
+                'body_tr'      => '<p>' . $body . '</p>',
+                'category'     => $cat,
+                'author'       => 'TapsinNet',
+                'published_at' => date('Y-m-d H:i:s', strtotime('-' . ($i * 15) . ' days')),
+                'read_minutes' => News::estimateReadTime($body),
+                'is_active'    => 1,
+                'created_at'   => date('Y-m-d H:i:s', strtotime('-' . ($i * 15) . ' days')),
+            ]);
+        }
+        ok(count($items) . ' haber eklendi.');
+    }
+
+    if ((int) Profile::countWhere() === 0) {
+        $items = [
+            ['Tapsin Yılmaz', 'Freelance Web Geliştirici', 'TapsinNet', 'team', 'İstanbul', 'Tam yığın web geliştirme; ölçülebilir sonuç odaklı çalışma.'],
+            ['Kuzey Sigorta', 'Müşteri', 'Kuzey Sigorta', 'client', null, null],
+            ['Çınar Kafe', 'Müşteri', 'Çınar Kafe', 'client', null, null],
+        ];
+        foreach ($items as $i => [$name, $title, $company, $type, $loc, $bio]) {
+            Profile::create([
+                'name'         => $name,
+                'title_tr'     => $title,
+                'company'      => $company,
+                'profile_type' => $type,
+                'location'     => $loc,
+                'bio_tr'       => $bio,
+                'is_active'    => 1,
+                'sort_order'   => $i,
+                'created_at'   => date('Y-m-d H:i:s', strtotime('-' . ($i * 10) . ' days')),
+            ]);
+        }
+        ok(count($items) . ' profil eklendi.');
+    }
+
+    // Yasal sayfalar
+    $pages = [
+        ['kvkk', 'KVKK Aydınlatma Metni', 1, 1, 'Aydınlatma metni', 'Bu sayfa KVKK kapsamında hazırlanmış temel aydınlatma metnidir.'],
+        ['gizlilik', 'Gizlilik Politikası', 1, 1, 'Gizlilik', 'Bu sitede hangi verileri, hangi amaçla topladığımızı açıklıyoruz.'],
+        ['cerez-politikasi', 'Çerez Politikası', 1, 1, 'Çerezler', 'Kullandığımız çerez türleri ve neden kullandığımız.'],
+        ['hakkinda', 'Hakkında', 0, 0, 'Hakkımda', 'Kısa tanışma.'],
+    ];
+    $added = 0;
+    foreach ($pages as $i => [$slug, $title, $system, $footer, $excerpt, $body]) {
+        $exists = Page::findAny((int) Page::countWhere(['slug' => $slug]));
+        if (Database::value('SELECT COUNT(*) FROM pages WHERE slug = :s', ['s' => $slug], 0) > 0) {
+            continue;
+        }
+        Page::create([
+            'title_tr'       => $title,
+            'slug'           => $slug,
+            'excerpt_tr'     => $excerpt,
+            'body_tr'        => '<p>' . $body . '</p><h2>Veri sorumlusu</h2><p>Site sahibi. İletişim formu aracılığıyla iletilen bilgiler yalnızca yanıt üretmek amacıyla saklanır.</p><h2>Yasal dayanak</h2><p>6698 sayılı Kişisel Verilerin Korunması Kanunu.</p>',
+            'is_system'      => $system,
+            'show_in_footer' => $footer,
+            'is_active'      => 1,
+            'sort_order'     => $i,
+            'created_at'     => now(),
+        ]);
+        $added++;
+    }
+    if ($added > 0) {
+        ok($added . ' yasal sayfa eklendi.');
+    }
+}
+
+// =============================================================================
+//  KOMUT YÖNLENDİRİCİ
+// =============================================================================
+
+switch ($command) {
+    case 'install':
+        head('TapsinNet kurulumu');
+
+        step('Yapılandırma');
+        $url = $args[0] ?? 'http://localhost:8000';
+        writeEnv('TapsinNet', $url, 'production', 'false', str_starts_with($url, 'https://'));
+        ok('.env oluşturuldu (' . $url . ')');
+
+        // .env yeniden yüklensin
+        \Core\Env::load(Application::basePath('.env'));
+        Config::loadFrom(Application::basePath('config'));
+        Config::set('app.debug', false);
+
+        step('Veritabanı');
+        migrate(false);
+
+        step('Modüller ve ayarlar');
+        syncModules();
+        seedSettings();
+
+        step('Yönetici hesabı');
+        $email    = $args[1] ?? null;
+        $password = $args[2] ?? null;
+
+        if ($email === null) {
+            // etkileşimli
+            if (function_exists('readline')) {
+                $email = trim((string) readline('E-posta: '));
+                $suggest = rtrim(preg_replace('/[^A-Za-z0-9]/', '', $email) ?: 'admin', 'abcdefghijklmnopqrstuvwxyz');
+                $password = (string) readline("Parola (en az 12 karakter, örn. {$suggest}!2026): ");
+            }
+        }
+        $email    = $email ?: 'admin@tapsinnet.local';
+        $password = $password ?: 'TapsinNet!2026';
+
+        if (User::emailExists($email)) {
+            ok('Hesap zaten var: ' . $email);
+        } else {
+            User::create([
+                'name'          => 'Yönetici',
+                'email'         => mb_strtolower(trim($email)),
+                'password_hash' => Auth::hash($password),
+                'role'          => 'admin',
+                'is_active'     => 1,
+            ]);
+            ok('Yönetici oluşturuldu: ' . $email);
+        }
+
+        step('Örnek içerik');
+        seedContent();
+
+        head('Kurulum tamamlandı');
+        out('  Panel : ' . $url . '/admin');
+        out('  E-posta: ' . $email);
+        out('  Parola : ' . ($args[2] ?? $password));
+        out('');
+        out('  ! Production kullanıyorsanız APP_DEBUG=false olduğunu ve HTTPS');
+        out('    kullandığınızda SESSION_SECURE=true yaptığınızı doğrulayın.');
+        break;
+
+    case 'migrate':
+        head('Şema güncelleniyor');
+        migrate(in_array('--fresh', $args, true));
+        syncModules();
+        Model::flushColumnCache();
+        ModuleRegistry::flush();
+        break;
+
+    case 'seed':
+        head('Örnek içerik yükleniyor');
+        syncModules();
+        seedSettings();
+        seedContent();
+        break;
+
+    case 'admin:create':
+        head('Yeni yönetici');
+        $email    = $args[0] ?? trim((string) (function_exists('readline') ? readline('E-posta: ') : ''));
+        $password = $args[1] ?? '';
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            fail('Geçerli bir e-posta girin.');
+            exit(1);
+        }
+        if (User::emailExists($email)) {
+            fail('Bu e-posta zaten kullanımda.');
+            exit(1);
+        }
+        if (mb_strlen($password) < (int) Config::get('security.password.min_length', 12)) {
+            fail('Parola en az ' . Config::get('security.password.min_length', 12) . ' karakter olmalı.');
+            exit(1);
+        }
+
+        $name = $args[2] ?? 'Yönetici';
+        User::create([
+            'name'          => $name,
+            'email'         => mb_strtolower(trim($email)),
+            'password_hash' => Auth::hash($password),
+            'role'          => 'admin',
+            'is_active'     => 1,
+        ]);
+        ok('Oluşturuldu: ' . $email);
+        break;
+
+    case 'modules':
+        head('Modül durumu');
+        if (isset($args[0]) && str_starts_with($args[0], '--off=')) {
+            $slug = substr($args[0], 6);
+            Module::setModuleActive($slug, false);
+            ok($slug . ' pasif yapıldı.');
+            break;
+        }
+        if (isset($args[0]) && str_starts_with($args[0], '--on=')) {
+            $slug = substr($args[0], 5);
+            Module::setModuleActive($slug, true);
+            ok($slug . ' aktif yapıldı.');
+            break;
+        }
+        foreach (Module::catalog() as $m) {
+            $state = $m['is_active'] ? "\033[32mAKTIF\033[0m" : "\033[31mpasif\033[0m";
+            printf("  %-16s %s  %s\n", $m['slug'], $state, ModuleRegistry::desc($m['slug']));
+        }
+        break;
+
+    case 'optimize':
+        head('Veritabanı bakımı');
+        $db = Database::connection();
+        $t  = microtime(true);
+        $db->exec('VACUUM');
+        $db->exec('ANALYZE');
+        $count = $db->query("SELECT COUNT(*) FROM sqlite_master")->fetchColumn();
+        ok('VACUUM + ANALYZE tamamlandı (' . round((microtime(true) - $t) * 1000) . ' ms, ' . $count . ' nesne)');
+        // WAL dosyalarını temizle
+        foreach (['-wal', '-shm'] as $suffix) {
+            @unlink(Database::connection()->getAttribute(PDO::ATTR_CONNECTION_STATUS) ? '' : '');
+        }
+        break;
+
+    case 'backup':
+        head('Yedek alınıyor');
+        $source = Config::get('database.connections.sqlite.database');
+        $stamp  = date('Ymd-His');
+        $target = Application::basePath('storage/database/backup-' . $stamp . '.sqlite');
+
+        if (is_file($source)) {
+            // WAL içeriğini de almak için VACUUM INTO
+            Database::connection()->exec("VACUUM INTO '" . str_replace("'", "''", $target) . "'");
+            ok(basename($target) . ' (' . round(filesize($target) / 1024) . ' KB)');
+        } else {
+            fail('Veritabanı bulunamadı: ' . $source);
+            exit(1);
+        }
+        break;
+
+    case 'check':
+        head('Sistem kontrolü');
+        $problems = 0;
+
+        // PHP sürümü
+        $phpOk = PHP_VERSION_ID >= 80100;
+        $phpOk ? ok('PHP ' . PHP_VERSION) : fail('PHP 8.1+ gerekli (bulunan: ' . PHP_VERSION . ')');
+        $problems += $phpOk ? 0 : 1;
+
+        // Eklentiler
+        foreach (['pdo_sqlite', 'mbstring', 'json', 'fileinfo'] as $ext) {
+            $has = extension_loaded($ext);
+            $has ? ok('php-' . $ext) : fail('php-' . $ext . ' EKSİK');
+            $problems += $has ? 0 : 1;
+        }
+        foreach (['gd', 'zip'] as $ext) {
+            extension_loaded($ext) ? ok('php-' . $ext . ' (isteğe bağlı)') : fail('php-' . $ext . ' eksik — görsel işleme sınırlı');
+        }
+
+        // Klasör izinleri
+        foreach (['storage', 'storage/logs', 'storage/cache', 'storage/database', 'public/uploads'] as $dir) {
+            $path = Application::basePath($dir);
+            if (!is_dir($path)) {
+                @mkdir($path, 0775, true);
+            }
+            $w = is_writable($path);
+            $w ? ok($dir . ' yazılabilir') : fail($dir . ' YAZILAMAZ');
+            $problems += $w ? 0 : 1;
+        }
+
+        // Yapılandırma
+        $env = Application::basePath('.env');
+        is_file($env) ? ok('.env mevcut') : fail('.env YOK');
+        $problems += is_file($env) ? 0 : 1;
+
+        $key = (string) Config::get('app.key', '');
+        (is_file($env) && $key !== '') ? ok('APP_KEY tanımlı') : fail('APP_KEY boş');
+        $problems += ($key !== '') ? 0 : 1;
+
+        $debug = Config::get('app.debug', false);
+        Config::get('app.env') === 'production' && !$debug
+            ? ok('Production + debug kapalı')
+            : fail('APP_DEBUG açıkken production kullanmayın');
+        $problems += ($debug ? 1 : 0);
+
+        $secure = Config::get('security.session.cookie_secure', false);
+        $isHttps = str_starts_with((string) Config::get('app.url', ''), 'https://');
+        ($secure || !$isHttps) ? ok('Oturum çerezi ayarı tutarlı') : fail('HTTPS kullanılıyor ama SESSION_SECURE=false');
+        $problems += ($secure || !$isHttps) ? 0 : 1;
+
+        // Veritabanı erişilebilirliği
+        $dbFile = (string) Config::get('database.connections.sqlite.database');
+        $inWebRoot = str_contains($dbFile, '/public/');
+        $inWebRoot ? fail('Veritabanı web kökünün İÇİNDE — güvenlik riski') : ok('Veritabanı web kökü dışında');
+        $problems += $inWebRoot ? 1 : 0;
+
+        is_writable($dbFile) || !is_file($dbFile) ? ok('Veritabanı dosyası erişilebilir') : fail('Veritabanı dosyası yazılabilir değil');
+
+        // Uploads koruması
+        $uploadHt = Application::basePath('public/uploads/.htaccess');
+        is_file($uploadHt) ? ok('uploads/.htaccess mevcut') : fail('uploads/.htaccess YOK — PHP yürütmesi açık olabilir');
+        $problems += is_file($uploadHt) ? 0 : 1;
+
+        // Tablolar
+        try {
+            $tables = Database::connection()->query("SELECT name FROM sqlite_master WHERE type='table'")->fetchAll();
+            count($tables) > 5 ? ok(count($tables) . ' tablo') : fail('Tablolar kurulmamış — php bin/console migrate çalıştırın');
+        } catch (\Throwable $e) {
+            fail('Veritabanı hatası: ' . $e->getMessage());
+            $problems++;
+        }
+
+        // Modül durumu
+        $active = count(array_filter(ModuleRegistry::states()));
+        ok($active . ' / ' . count(Config::get('modules', [])) . ' modül aktif');
+
+        head($problems === 0 ? 'Tüm kontroller geçti.' : $problems . ' sorun bulundu.');
+        exit($problems === 0 ? 0 : 1);
+
+    case 'help':
+    case '--help':
+    case '-h':
+    default:
+        out('TapsinNet konsol');
+        out('');
+        out('  php bin/console install [url] [email] [password]   Kurulum + admin hesabı');
+        out('  php bin/console migrate [--fresh]          Şemayı uygula');
+        out('  php bin/console seed                      Örnek içerik yükle');
+        out('  php bin/console admin:create <email> <pass> [ad]   Yeni yönetici');
+        out('  php bin/console modules [--on=slug|--off=slug]   Modül durumu');
+        out('  php bin/console optimize                  VACUUM + ANALYZE');
+        out('  php bin/console backup                    Veritabanı yedeği');
+        out('  php bin/console check                     Sistem kontrolü');
+        out('');
+        break;
+}

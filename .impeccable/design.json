@@ -1,0 +1,321 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-28T06:50:00Z",
+  "title": "Design System: TapsinNet",
+  "extensions": {
+    "colorMeta": {
+      "balmumu": {
+        "role": "primary",
+        "displayName": "Balmumu",
+        "canonical": "oklch(56% 0.145 48)",
+        "tonalRamp": [
+          "oklch(18% 0.070 48)",
+          "oklch(28% 0.100 48)",
+          "oklch(38% 0.125 48)",
+          "oklch(48% 0.140 48)",
+          "oklch(58% 0.145 48)",
+          "oklch(70% 0.120 48)",
+          "oklch(82% 0.080 48)",
+          "oklch(93% 0.038 62)"
+        ]
+      },
+      "balmumu-murekkep": {
+        "role": "primary",
+        "displayName": "Balmumu Mürekkep",
+        "canonical": "oklch(44% 0.130 45)",
+        "tonalRamp": [
+          "oklch(16% 0.060 45)",
+          "oklch(26% 0.090 45)",
+          "oklch(36% 0.120 45)",
+          "oklch(44% 0.130 45)",
+          "oklch(56% 0.145 48)",
+          "oklch(68% 0.115 45)",
+          "oklch(80% 0.075 45)",
+          "oklch(92% 0.038 62)"
+        ]
+      },
+      "vitrin-kagidi": {
+        "role": "neutral",
+        "displayName": "Vitrin Kâğıdı",
+        "canonical": "oklch(97% 0.008 70)",
+        "tonalRamp": [
+          "oklch(14% 0.006 70)",
+          "oklch(27% 0.007 70)",
+          "oklch(41% 0.008 70)",
+          "oklch(56% 0.009 70)",
+          "oklch(71% 0.010 70)",
+          "oklch(85% 0.010 70)",
+          "oklch(91% 0.012 68)",
+          "oklch(97% 0.008 70)"
+        ]
+      },
+      "vitrin-kagidi-2": {
+        "role": "neutral",
+        "displayName": "Vitrin Kâğıdı 2",
+        "canonical": "oklch(94.5% 0.010 70)",
+        "tonalRamp": [
+          "oklch(20% 0.008 70)",
+          "oklch(34% 0.009 70)",
+          "oklch(48% 0.010 70)",
+          "oklch(62% 0.010 70)",
+          "oklch(76% 0.010 70)",
+          "oklch(85% 0.010 70)",
+          "oklch(90% 0.011 70)",
+          "oklch(94.5% 0.010 70)"
+        ]
+      },
+      "vitrin-murekkep": {
+        "role": "neutral",
+        "displayName": "Vitrin Mürekkep",
+        "canonical": "oklch(21% 0.014 55)",
+        "tonalRamp": [
+          "oklch(21% 0.014 55)",
+          "oklch(27% 0.013 56)",
+          "oklch(33% 0.012 58)",
+          "oklch(38% 0.011 60)",
+          "oklch(44% 0.010 62)",
+          "oklch(51% 0.010 63)",
+          "oklch(56% 0.009 64)",
+          "oklch(64% 0.008 65)"
+        ]
+      },
+      "vitrin-cizgi": {
+        "role": "neutral",
+        "displayName": "Vitrin Çizgi",
+        "canonical": "oklch(85% 0.010 70)",
+        "tonalRamp": [
+          "oklch(21% 0.014 55)",
+          "oklch(38% 0.011 60)",
+          "oklch(56% 0.009 64)",
+          "oklch(70% 0.010 70)",
+          "oklch(85% 0.010 70)",
+          "oklch(90% 0.008 72)",
+          "oklch(94.5% 0.010 70)",
+          "oklch(97% 0.008 70)"
+        ]
+      },
+      "vitrin-gece": {
+        "role": "neutral",
+        "displayName": "Vitrin Gece",
+        "canonical": "oklch(19% 0.014 55)",
+        "tonalRamp": [
+          "oklch(19% 0.014 55)",
+          "oklch(23% 0.015 55)",
+          "oklch(28% 0.014 55)",
+          "oklch(34% 0.014 55)",
+          "oklch(45% 0.012 58)",
+          "oklch(60% 0.011 60)",
+          "oklch(76% 0.010 66)",
+          "oklch(95% 0.008 70)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Vitrin Tabelası",
+        "purpose": "Yalnızca hero başlığı. Vitrinin tabelası gibi — sıcak, geleneksel, otoriter. Başka hiçbir yerde kullanılmaz."
+      },
+      "headline": {
+        "displayName": "Bölüm Başlığı",
+        "purpose": "Bölüm başlıkları (h2). Aynı aile, bir kademe küçük."
+      },
+      "title": {
+        "displayName": "Kart Başlığı",
+        "purpose": "Kart başlıkları ve form grupları. Sans, gövdeden en az 300 birim ağır."
+      },
+      "body": {
+        "displayName": "Gövde",
+        "purpose": "Ekranda uzun metin taşıyan tek yüz. Satır uzunluğu 65ch."
+      },
+      "label": {
+        "displayName": "Üst Etiket",
+        "purpose": "Yalnızca .masthead__tag ve .hero__stat-value. Üçüncü bir kullanım bu sözleşmeyi bozar."
+      }
+    },
+    "shadows": [
+      {
+        "name": "surface-md",
+        "value": "0 6px 20px oklch(21% 0.014 55 / 0.08), 0 2px 6px oklch(21% 0.014 55 / 0.04)",
+        "purpose": "Yalnızca açılır menü (dropdown). Gerçekten zeminin üstüne çıkan tek yüzey türü."
+      },
+      {
+        "name": "surface-lg",
+        "value": "0 18px 48px oklch(21% 0.014 55 / 0.12), 0 4px 12px oklch(21% 0.014 55 / 0.05)",
+        "purpose": "Yalnızca modal: lightbox, video oynatıcı."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Varsayılan durum geçişi. Hızlı başlar, yumuşak durur."
+      },
+      {
+        "name": "dur-fast",
+        "value": "140ms",
+        "purpose": "Renk, kenarlık, zemin geçişleri — hover, focus, durum değişimi."
+      },
+      {
+        "name": "dur-base",
+        "value": "220ms",
+        "purpose": "Masthead kenarlık, burger çizgi dönüşü."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "prefers-reduced-motion altında tüm animasyon ve geçişler bu değere çöker."
+      }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "480px" },
+      { "name": "nav-burger", "value": "860px" },
+      { "name": "tablet", "value": "768px" },
+      { "name": "desktop", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ana eylem. Koyu mürekkep dolgu, hover'da balmumuya döner ve 1px içeri itilir.",
+      "html": "<button class=\"ds-btn-primary\">Projeni anlat</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.5rem 1rem; font-family: \"IBM Plex Sans\", ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; line-height: 1.4; text-decoration: none; white-space: nowrap; background: var(--color-ink, oklch(21% 0.014 55)); color: var(--color-paper, oklch(97% 0.008 70)); border: 1px solid var(--color-ink, oklch(21% 0.014 55)); border-radius: 3px; cursor: pointer; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), color 140ms cubic-bezier(0.16, 1, 0.3, 1), transform 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: var(--color-accent-ink, oklch(44% 0.130 45)); border-color: var(--color-accent-ink, oklch(44% 0.130 45)); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-focus, oklch(50% 0.160 45)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Primary Button — Busy",
+      "kind": "button",
+      "refersTo": "button-primary-hover",
+      "description": "Gönderim sırasında. Metin saydamlaşır, spinner belirir; buton kilitli ama opak kalır.",
+      "html": "<button class=\"ds-btn-primary ds-btn-busy\" aria-busy=\"true\" disabled>Projeni anlat</button>",
+      "css": ".ds-btn-primary.ds-btn-busy { position: relative; color: transparent; cursor: progress; opacity: 1; } .ds-btn-primary.ds-btn-busy::after { content: \"\"; position: absolute; width: 0.9em; height: 0.9em; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; color: var(--color-paper, oklch(97% 0.008 70)); animation: ds-btn-spin 640ms linear infinite; } @keyframes ds-btn-spin { to { transform: rotate(360deg); } } @media (prefers-reduced-motion: reduce) { .ds-btn-primary.ds-btn-busy::after { animation: none; border-top-color: currentColor; opacity: 0.5; } }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "İkincil eylem. Dolgu yok, kenarlık yok; hover'da koyu dolguya döner.",
+      "html": "<button class=\"ds-btn-ghost\">İşlerime bak</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.5rem 1rem; font-family: \"IBM Plex Sans\", ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; line-height: 1.4; background: none; color: var(--color-ink, oklch(21% 0.014 55)); border: 1px solid var(--color-ink, oklch(21% 0.014 55)); border-radius: 3px; cursor: pointer; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-ghost:hover { background: var(--color-ink, oklch(21% 0.014 55)); color: var(--color-paper, oklch(97% 0.008 70)); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--color-focus, oklch(50% 0.160 45)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Çıplak metin linki. Balmumu mürekkep + altı çizgi; 24px dokunma hedefi görseli değiştirmeden sağlar.",
+      "html": "<a class=\"ds-btn-quiet\" href=\"#\">Tümünü gör</a>",
+      "css": ".ds-btn-quiet { display: inline-block; padding-block: 2px; min-height: 24px; font-family: \"IBM Plex Sans\", ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; line-height: 1.4; color: var(--color-accent-ink, oklch(44% 0.130 45)); text-decoration: underline; text-underline-offset: 0.2em; border-radius: 0; } .ds-btn-quiet:hover { color: var(--color-accent, oklch(56% 0.145 48)); } .ds-btn-quiet:focus-visible { outline: 2px solid var(--color-focus, oklch(50% 0.160 45)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Nav Link",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Üst menü bağlantısı. Şeffaf zemin; hover'da kâğıt-2 açılır, aktifken balmumu çerçevelenir.",
+      "html": "<a class=\"ds-nav-link\" href=\"#\">Hizmetler</a>",
+      "css": ".ds-nav-link { display: inline-flex; align-items: center; justify-content: center; min-height: 2rem; padding: 0.25rem 0.75rem; font-family: \"IBM Plex Sans\", ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; line-height: 1.2; color: var(--color-ink-soft, oklch(33% 0.012 58)); text-decoration: none; white-space: nowrap; background: transparent; border: 1px solid transparent; border-radius: 3px; transition: color 140ms cubic-bezier(0.16, 1, 0.3, 1), background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), border-color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-nav-link:hover { color: var(--color-ink, oklch(21% 0.014 55)); background: var(--color-paper-2, oklch(94.5% 0.010 70)); border-color: var(--color-rule, oklch(85% 0.010 70)); } .ds-nav-link.is-active { color: var(--color-accent-ink, oklch(44% 0.130 45)); background: var(--color-accent-soft, oklch(92% 0.038 62)); border-color: var(--color-accent, oklch(56% 0.145 48)); } .ds-nav-link:focus-visible { outline: 2px solid var(--color-focus, oklch(50% 0.160 45)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "description": "Liste filtresi. Hap biçimli tek istisna; seçiliyken koyu dolguya döner.",
+      "html": "<a class=\"ds-chip is-active\" href=\"#\">Tümü <span class=\"ds-chip__n\">6</span></a>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 0.25rem; padding: 2px 0.5rem; font-family: \"IBM Plex Sans\", ui-sans-serif, system-ui, sans-serif; font-size: 0.8rem; color: var(--color-ink-soft, oklch(33% 0.012 58)); text-decoration: none; background: none; border: 1px solid var(--color-rule, oklch(85% 0.010 70)); border-radius: 999px; white-space: nowrap; cursor: pointer; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), color 140ms cubic-bezier(0.16, 1, 0.3, 1), border-color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-chip:hover { color: var(--color-ink, oklch(21% 0.014 55)); border-color: var(--color-ink, oklch(21% 0.014 55)); } .ds-chip.is-active { color: var(--color-paper, oklch(97% 0.008 70)); background: var(--color-ink, oklch(21% 0.014 55)); border-color: var(--color-ink, oklch(21% 0.014 55)); } .ds-chip__n { opacity: 0.6; font-variant-numeric: tabular-nums; } .ds-chip:focus-visible { outline: 2px solid var(--color-focus, oklch(50% 0.160 45)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Form alanı. Kenarlık hover'da koyulaşır, focus'ta mürekkebe döner — halka yok.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"ornek@site.com\">",
+      "css": ".ds-input { width: 100%; padding: 0.5rem 0.75rem; font-family: \"IBM Plex Sans\", ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; line-height: 1.5; color: var(--color-ink, oklch(21% 0.014 55)); background: var(--color-paper, oklch(97% 0.008 70)); border: 1px solid var(--color-rule-strong, oklch(77% 0.013 66)); border-radius: 3px; appearance: none; transition: border-color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-input::placeholder { color: var(--color-ink-faint, oklch(56% 0.009 64)); opacity: 1; } .ds-input:hover { border-color: var(--color-ink-faint, oklch(56% 0.009 64)); } .ds-input:focus { border-color: var(--color-ink, oklch(21% 0.014 55)); outline: none; } .ds-input[aria-invalid=\"true\"] { border-color: var(--color-danger, oklch(48% 0.160 25)); } .ds-input:focus-visible { outline: 2px solid var(--color-focus, oklch(50% 0.160 45)); outline-offset: 1px; }"
+    },
+    {
+      "name": "Field Label + Error",
+      "kind": "input",
+      "description": "Alan etiketi üstte, hata altta. Hata kırmızı ve ⚠ önekiyle; sistem hiçbir zaman yalnız renkle sinyal vermez.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field__label\" for=\"ds-x\">E-posta adresi</label><input class=\"ds-input\" id=\"ds-x\" type=\"email\" aria-invalid=\"true\"><p class=\"ds-field__error\" role=\"alert\">Geçerli bir adres girin</p></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; } .ds-field__label { font-family: \"IBM Plex Sans\", ui-sans-serif, system-ui, sans-serif; font-size: 0.8rem; font-weight: 600; color: var(--color-ink-soft, oklch(33% 0.012 58)); } .ds-field__error { display: flex; align-items: flex-start; gap: 4px; margin: 0; font-family: \"IBM Plex Sans\", ui-sans-serif, system-ui, sans-serif; font-size: 0.7rem; font-weight: 500; color: var(--color-danger, oklch(48% 0.160 25)); } .ds-field__error::before { content: \"⚠\"; flex-shrink: 0; }"
+    },
+    {
+      "name": "Project Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Portföy kartı. Köşesiz — kâğıt üstünde duran bir kağıt parçası. Gölge yok.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card__media\"></div><div class=\"ds-card__body\"><h3 class=\"ds-card__title\">E-ticaret katalog uygulaması</h3><p class=\"ds-card__text\">Özel yazılım · 2026</p></div></article>",
+      "css": ".ds-card { display: flex; flex-direction: column; min-width: 0; background: var(--color-paper, oklch(97% 0.008 70)); } .ds-card__media { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--color-paper-2, oklch(94.5% 0.010 70)); border: 1px solid var(--color-rule, oklch(85% 0.010 70)); } .ds-card__body { flex: 1; padding-top: 1rem; min-width: 0; } .ds-card__title { margin: 0 0 0.25rem; font-family: \"IBM Plex Sans\", ui-sans-serif, system-ui, sans-serif; font-size: 1.4063rem; font-weight: 700; line-height: 1.28; letter-spacing: -0.022em; color: var(--color-ink, oklch(21% 0.014 55)); } .ds-card__text { margin: 0; font-size: 0.875rem; line-height: 1.62; color: var(--color-ink-muted, oklch(44% 0.010 62)); }"
+    },
+    {
+      "name": "Section Head",
+      "kind": "custom",
+      "description": "Bölüm başlığı + eylem. Altında 1px çizgi; bölümün sınırını o çizgi çizer, gölge değil.",
+      "html": "<div class=\"ds-section__head\"><h2 class=\"ds-section__title\">İlgili içerikler</h2><a class=\"ds-btn-quiet\" href=\"#\">Tümünü gör</a></div>",
+      "css": ".ds-section__head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem 2rem; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-rule, oklch(85% 0.010 70)); } .ds-section__title { margin: 0; font-family: \"Fraunces\", \"Iowan Old Style\", \"Palatino Linotype\", Georgia, serif; font-size: 2.1973rem; font-weight: 600; line-height: 1.28; letter-spacing: -0.022em; color: var(--color-ink, oklch(21% 0.014 55)); }"
+    },
+    {
+      "name": "Lang Switch",
+      "kind": "custom",
+      "description": "Dil seçici. Kapsayıcı kenarlığı, öğeler arasında bölen çizgi; aktif dil koyu dolgu.",
+      "html": "<div class=\"ds-lang\"><a class=\"ds-lang__item is-active\" href=\"#\">Türkçe</a><a class=\"ds-lang__item\" href=\"#\">English</a></div>",
+      "css": ".ds-lang { display: inline-flex; align-items: stretch; overflow: hidden; background: var(--color-paper, oklch(97% 0.008 70)); border: 1px solid var(--color-rule, oklch(85% 0.010 70)); border-radius: 3px; } .ds-lang__item { display: inline-flex; align-items: center; justify-content: center; min-width: 2.25rem; height: 2rem; padding: 0 0.5rem; font-family: \"IBM Plex Sans\", ui-sans-serif, system-ui, sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink-muted, oklch(44% 0.010 62)); text-decoration: none; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-lang__item + .ds-lang__item { border-left: 1px solid var(--color-rule, oklch(85% 0.010 70)); } .ds-lang__item:hover { color: var(--color-ink, oklch(21% 0.014 55)); background: var(--color-paper-2, oklch(94.5% 0.010 70)); } .ds-lang__item.is-active { color: var(--color-paper, oklch(97% 0.008 70)); background: var(--color-ink, oklch(21% 0.014 55)); } .ds-lang__item:focus-visible { outline: 2px solid var(--color-focus, oklch(50% 0.160 45)); outline-offset: -2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Dükkân Vitrini",
+    "overview": "Bu bir atölye dükkanının vitrini. Camın arkasında çalışan biri var; vitrin onu özlemiyor, işini gösteriyor. Krem kâğıt zemin, sıcak mürekkep yazı, tek bir balmumu vurgu. Vitrinin işi müşteriyi içeri almak olduğu için her karar \"bu işi yapacak kişiye güvenebilir miyim\" sorusuna hizmet eder.\n\nDuygu: sıcak, güvenilir, mesafeli değil ama iddialı da değil. Bir katalog değil bir teklif masası. Boş vitrin de dürüst bir vitrindir — doldurulmamış alan, doldurulmuş gibi gösterilmez; sistemin kendi içeriğinin eksikliği kadar, sistemin doğruluğunun da kanıtıdır.\n\nYoğunluk: orta. Kart ızgaraları 3 kolon, form alanları çift kolon, mobilde tek kolona düşer. Nefes payı var ama hava değil — her boşluk bir kararın sonucu.",
+    "keyCharacteristics": [
+      "Sıcak krem kâğıt zemin, asla saf beyaz değil",
+      "Tek vurgu rengi (balmumu), seyrek ve kasıtlı",
+      "Keskin köşeler (2-6px), yuvarlatılmış \"blob\" yok",
+      "Gölge neredeyse yok; derinlik çizgi ve ton farkıyla kurulur",
+      "Üç yazı tipi, monospace yalnızca etiketlerde",
+      "Mobil önce: her sayfa ilk ekranda anlaşılır"
+    ],
+    "rules": [
+      {
+        "name": "The Vitrin Kuralı",
+        "body": "Vurgu rengi bir ekranın %3'ünü geçmez. Balmumu az görünür; her kullanımı bir şey söylemek içindir, süslemek için değil.",
+        "section": "colors"
+      },
+      {
+        "name": "The Boşluk Dürüstlüğü Kuralı",
+        "body": "Bir veri yoksa alan render edilmez. Yer tutucu görsel, sahte testimonial veya uydurma sayı hiçbir zaman gösterilmez. Boş kutu bir hatadır, tasarım onu saklamaz.",
+        "section": "colors"
+      },
+      {
+        "name": "The İki Kod Bir Alan Kuralı",
+        "body": "Başlık gövdeden en az 300 birim ağırdır (400 → 700). Ara ton yasaktır; bu, hiyerarşiyi yanlış okunmaz kılar.",
+        "section": "typography"
+      },
+      {
+        "name": "The Mono İkinci Kuralı",
+        "body": "JetBrains Mono yalnızca .masthead__tag ve .hero__stat-value üzerinde. Üçüncü bir kullanım bu sözleşmeyi bozar.",
+        "section": "typography"
+      },
+      {
+        "name": "The Düz Varsayılan Kuralı",
+        "body": "Yüzeyler dinlenme hâlinde düzdür. Gölge yalnızca gerçek yükselmeye yanıt verir — hover, açılır menü, modal. Kart, buton, input asla gölgeli değildir.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Keskin Köşe Kuralı",
+        "body": "Buton, input ve dil seçicide köşe 3px'te durur. Kart ve bölüm köşesizdir. Yuvarlak köşe (>= 8px) bu sistemde yabancı bir sinyal yayar.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do her form alanına col-* sınıfı ver; form-grid 12 kolonludur ve sınıfsız alan 1/12 genişlik alır.",
+      "Do kart ızgarası için card-grid--N kullan; temel .card-grid yalnızca modifiyesiz kullanımdır.",
+      "Do yeni renk eklerken önce tokens.css'e isimli token olarak yaz, sonra var() ile referans ver. Ham OKLCH/hex yazma.",
+      "Do yeni bileşende önce mevcut token'ı ara; yeni token ancak gerçekten yeni bir kavram varsa.",
+      "Do boş veri alanını hiç render etme."
+    ],
+    "donts": [
+      "Don't vurgu rengini geniş yüzeye yayma. Balmumu kenarlık, işaret ve tek satırlık metin içindir.",
+      "Don't kartlara, butonlara veya inputlara gölge ekle. Gölge yalnızca açılır menü ve modalda.",
+      "Don't yeni yazı tipi ailesi ekle. Üç aile sabit; JetBrains Mono iki yerde sınırlı.",
+      "Don't yuvarlatmayı 8px üstüne çıkar.",
+      "Don't testimonial, müşteri logosu, başarı sayısı veya fiyat uydurma.",
+      "Don't HTML'de kullanılan sınıfı CSS'te tanımlamayı atlama. Tanımsız sınıf (.masthead__links, .card-grid--3, .masthead__search-btn gibi) tarayıcı varsayılanına düşer ve düzeni bozar."
+    ]
+  }
+}

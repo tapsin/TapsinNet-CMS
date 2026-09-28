@@ -1,0 +1,88 @@
+# =============================================================================
+#  TapsinNet — public/.htaccess (önerilen web kökü)
+# =============================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Var olan dosya/dizinler doğrudan sunulur
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Geri kalan her şey ön denetleyiciye gider
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Dizin listelemesi kapalı
+Options -Indexes
+
+# --- Güvenlik başlıkları (uygulama da gönderir; yedek katman) ---
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always unset X-Powered-By
+    Header always unset Server
+</IfModule>
+
+# --- PHP ayarları (php_value kullanılabiliyorsa) ---
+<IfModule mod_php.c>
+    php_flag display_errors Off
+    php_flag expose_php Off
+    php_value upload_max_filesize 10M
+    php_value post_max_size 12M
+    php_value max_execution_time 30
+    php_value session.cookie_httponly 1
+    php_value session.cookie_samesite Lax
+    php_value session.use_strict_mode 1
+    php_value session.use_only_cookies 1
+</IfModule>
+
+# --- Hassas dosya türleri ---
+<FilesMatch "^\.(env|git|ht|svn|ssh|sql|sqlite|db|log|ini|yml|yaml|json|lock|md|bak|old|orig|dist|sh|inc|yml)$">
+    Require all denied
+</FilesMatch>
+
+# --- PHP kaynakları ---
+<FilesMatch "\.(php|phtml|phar|inc)$">
+    Require all denied
+</FilesMatch>
+<FilesMatch "index\.php$">
+    Require all granted
+</FilesMatch>
+
+# --- Uzun ömürlü önbellek (font/medya) ---
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css                "access plus 1 year"
+    ExpiresByType application/javascript  "access plus 1 year"
+    ExpiresByType font/woff2              "access plus 1 year"
+    ExpiresByType image/webp              "access plus 6 months"
+    ExpiresByType image/jpeg              "access plus 6 months"
+    ExpiresByType image/png               "access plus 6 months"
+    ExpiresByType image/svg+xml           "access plus 1 year"
+    ExpiresDefault                        "access plus 1 hour"
+</IfModule>
+
+# --- Gzip ---
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml \
+        application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# --- MIME güvenliği ---
+<IfModule mod_mime.c>
+    AddDefaultCharset UTF-8
+    AddType text/css                     .css
+    AddType application/javascript       .js
+    AddType font/woff2                   .woff2
+    AddType image/webp                   .webp
+    AddType image/avif                   .avif
+    <FilesMatch "\.(css|js|woff2|webp|avif|svg|png|jpg|jpeg|gif)$">
+        Header set X-Content-Type-Options "nosniff"
+    </FilesMatch>
+</IfModule>
+
+ErrorDocument 404 /index.php
