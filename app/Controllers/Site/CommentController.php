@@ -31,9 +31,13 @@ final class CommentController extends Controller
         $type   = (string) $this->request->post('content_type', '');
         $entity = (int) $this->request->post('entity_id', 0);
 
+        // Yedek adres: içerik sayfasının kendisi. Referer gelmezse (bazı
+        // gizlilik ayarları, doğrudan POST) yorum 404'e düşmesin.
+        $anchor = $this->contentUrl($type, $entity) . '#comments';
+
         // Honeypot + zaman tuzağı
         if (trim((string) $this->request->post('website', '')) !== '') {
-            return back('#comments');
+            return back($anchor);
         }
 
         $data = [
@@ -45,7 +49,7 @@ final class CommentController extends Controller
         $throttle = RateLimiter::throttle('comment:' . $this->request->ip(), 'comment_form');
         if (!$throttle['allowed']) {
             Session::flash('error', t('comment.too_many'));
-            return back('#comments');
+            return back($anchor);
         }
 
         $v = Validator::make($data, [
@@ -66,13 +70,13 @@ final class CommentController extends Controller
         }
 
         if ($errors !== []) {
-            return $this->withErrors($this->request->all(), $errors, '#comments');
+            return $this->withErrors($this->request->all(), $errors, $anchor);
         }
 
         // Form koruması — alan hataları geçildikten sonra sorulur, aynı
         // iletişim formundaki gibi: kullanıcı önce kendi hatasını görür.
         if (Captcha::verify($this->request) !== null) {
-            return $this->withErrors($this->request->all(), ['captcha' => t('captcha.error')], '#comments');
+            return $this->withErrors($this->request->all(), ['captcha' => t('captcha.error')], $anchor);
         }
 
         // Aynı IP'den aynı içeriğe 24 saat içinde ikinci yorum engellenir
@@ -88,7 +92,7 @@ final class CommentController extends Controller
         );
         if ((int) $dupe > 0) {
             Session::flash('error', t('comment.duplicate'));
-            return back('#comments');
+            return back($anchor);
         }
 
         Comment::create([
@@ -108,6 +112,40 @@ final class CommentController extends Controller
         Logger::info('Yorum gönderildi', ['type' => $type, 'entity' => $entity]);
 
         Session::flash('success', t('comment.pending'));
-        return back('#comments');
+        return back($anchor);
+    }
+
+    /**
+     * Yorumun ait olduğu içerik sayfasının YOLU.
+     *
+     * Geri dönüşte Referer yoksa kullanılır. Önceden yalnızca '#comments'
+     * çapası dönüyordu; çapa tek başına mevcut (POST) adrese göre
+     * çözüldüğü için kullanıcı 404'e düşüyordu.
+     *
+     * item_url() MUTLAK adres döndürür; burada yol gerekiyor, çünkü
+     * back() → Security::safeRedirect() mutlak adresi reddeder.
+     */
+    private function contentUrl(string $type, int $entity): string
+    {
+        $table = Comment::TYPES[$type]['table'] ?? null;
+        $route = ModuleRegistry::route($type);
+        if ($table === null || $route === null || $entity <= 0) {
+            return '/';
+        }
+        try {
+            $row = \Core\Database::first(
+                "SELECT slug FROM {$table} WHERE id = :id AND deleted_at IS NULL LIMIT 1",
+                ['id' => $entity]
+            );
+            $slug = is_array($row) ? (string) ($row['slug'] ?? '') : '';
+            if ($slug !== '') {
+                $lang   = Translator::lang();
+                $prefix = $lang === (string) \Core\Config::get('i18n.default') ? '' : $lang . '/';
+                return '/' . $prefix . $route . '/' . $slug;
+            }
+        } catch (\Throwable) {
+            // Tablo yoksa ya da sorgu başarısızsa ana sayfaya dön.
+        }
+        return '/';
     }
 }

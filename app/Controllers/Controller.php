@@ -73,11 +73,13 @@ abstract class Controller
         return Response::redirect(\Core\Security::safeRedirect($url), $status);
     }
 
+    /**
+     * Geri dön. Çapa (fragment) koruma kuralı global back() yardımcısında
+     * yaşıyor; burada tekrar yazmıyoruz, iki uygulama birbirinden ayrışmasın.
+     */
     protected function back(string $fallback = '/'): Response
     {
-        return Response::redirect(
-            \Core\Security::safeRedirect($this->request->wantsBack($fallback), $fallback)
-        );
+        return \back($fallback);
     }
 
     protected function json(array $data, int $status = 200): Response

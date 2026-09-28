@@ -357,13 +357,32 @@ foreach ($badUrls as $u) {
 }
 check('Açık yönlendirme engellendi', $allSafe, count($badUrls) . ' vektör · ' . count($leaked) . ' sızdı');
 
+// Aynı origin referer KABUL edilir ve YOL olarak döner.
+// DÖNÜŞÜM: Bu metot eskiden mutlak URL döndürüyordu. Tarayıcılar
+// Referer'ı daima mutlak gönderir ve Security::safeRedirect() mutlak
+// adresi reddeder — yani geri dönüş her zaman fallback'e düşüyor,
+// yorum gönderimi gibi çapa kullanan durumlarda kullanıcı 404'e
+// düşüyordu. Beklenen: kabul + doğru yol.
 $_SERVER['HTTP_REFERER'] = 'http://tapsinnet.test/admin';
 $r = new Request();
-check('Aynı origin referer kabul', $r->wantsBack('/x') === 'http://tapsinnet.test/admin', $r->wantsBack('/x'));
+check('Aynı origin referer kabul', $r->wantsBack('/x') === '/admin', $r->wantsBack('/x'));
 
 $_SERVER['HTTP_REFERER'] = 'https://tapsinnet.test/en/hizmetler';
 $r = new Request();
-check('Aynı origin HTTPS referer kabul', $r->wantsBack('/x') === 'https://tapsinnet.test/en/hizmetler');
+check('Aynı origin HTTPS referer kabul', $r->wantsBack('/x') === '/en/hizmetler', $r->wantsBack('/x'));
+
+// Sorgu dizesi korunur, çapa düşer (çapayı back() yardımcısı ekler).
+$_SERVER['HTTP_REFERER'] = 'http://tapsinnet.test/ara?q=haber';
+$r = new Request();
+check('Referer sorgu dizesi korunur', $r->wantsBack('/x') === '/ara?q=haber', $r->wantsBack('/x'));
+
+// Gerçek akış: wantsBack → safeRedirect zinciri mutlak adres üretmemeli.
+$_SERVER['HTTP_REFERER'] = 'http://tapsinnet.test/isler/ornek';
+$r = new Request();
+$backTarget = \Core\Security::safeRedirect($r->wantsBack('#comments'), '#comments');
+check('Geri dönüş zinciri yola çözülüyor',
+    str_starts_with($backTarget, '/isler/ornek'),
+    $backTarget);
 
 // =========================================================================
 section('Parola ve kimlik doğrulama');

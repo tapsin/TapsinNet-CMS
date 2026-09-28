@@ -238,6 +238,18 @@ final class Request
         return is_string($r) && $r !== '' ? $r : null;
     }
 
+    /**
+     * Geri dönülecek YOL (path + query), doğrulanmış.
+     *
+     * DÖNÜŞÜM BİLEREKÇE: Bu metot eskiden Referer'ı olduğu gibi (mutlak URL)
+     * döndürüyordu. Tarayıcılar Referer'ı daima mutlak gönderir ve
+     * Security::safeRedirect() mutlak URL'i reddeder — yani geri dönüş her
+     * zaman fallback'e düşüyordu. Yorum gönderimi gibi #comments yemine
+     * düşen durumlarda tarayıcı çapayı mevcut adrese göre çözüp
+     * POST adresine (404) gidiyordu.
+     *
+     * Aynı-origin doğrulaması korunur; yalnızca dönüş değeri yola indirgenir.
+     */
     public function wantsBack(string $fallback = '/'): string
     {
         $ref = $this->referer();
@@ -263,6 +275,12 @@ final class Request
             return $fallback;   // göreli de değil, şema da yok → güvenlik yok
         }
 
-        return $ref;
+        // Yalnızca yol + sorgu. Çapa (fragment) korunmaz: istenirse
+        // back() yardımcısı fallback'ten ekler.
+        $path  = parse_url($ref, PHP_URL_PATH);
+        $query = parse_url($ref, PHP_URL_QUERY);
+        $path  = (is_string($path) && $path !== '') ? $path : '/';
+
+        return (is_string($query) && $query !== '') ? $path . '?' . $query : $path;
     }
 }

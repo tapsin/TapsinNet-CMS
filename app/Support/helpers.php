@@ -372,7 +372,18 @@ if (!function_exists('redirect')) {
 if (!function_exists('back')) {
     function back(string $fallback = '/'): Response
     {
-        return Response::redirect(Security::safeRedirect(Request::current()->wantsBack($fallback), $fallback));
+        $target = Security::safeRedirect(Request::current()->wantsBack($fallback), $fallback);
+
+        // Geri dönüş yolunda çapa yoksa fallback'in çapası eklenir.
+        // Yorum gönderimi bu çapaya dayanır: kullanıcı sayfanın başına
+        // değil, yorum bölümüne dönmelidir. Fallback yalnızca çapa da olabilir
+        // ('#comments'), yol + çapa da olabilir ('/isler/x#comments').
+        if (!str_contains($target, '#') && str_contains($fallback, '#')) {
+            $pos = strpos($fallback, '#');
+            $target .= substr($fallback, (int) $pos);
+        }
+
+        return Response::redirect($target);
     }
 }
 
