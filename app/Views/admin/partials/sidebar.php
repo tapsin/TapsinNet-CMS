@@ -41,9 +41,12 @@ $systemSlugs = ['messages', 'comments', 'search'];
 
             <?php foreach ($groupMods as $m):
                 $slug = $m['slug'];
-                // 'admin.services.index' → /admin/services
-                $routeName = preg_replace('/\.index$/', '', (string) $m['admin']);
-                $href = $m['admin'] ? url('/' . str_replace('.', '/', $routeName)) : null;
+                // Yol rota adından TAHMİN EDİLMEZ. comments/messages/search
+                // rotaları Türkçe (/admin/yorumlar) ve nokta çevirisi
+                // /admin/comments üretiyordu — menü 404'e düşüyordu.
+                $href = $m['admin'] && \Core\ModuleRegistry::adminPath($slug)
+                    ? url('/admin/' . \Core\ModuleRegistry::adminPath($slug))
+                    : null;
                 if ($href === null) { continue; }
                 $isActive = $current === $m['admin'];
                 ?>

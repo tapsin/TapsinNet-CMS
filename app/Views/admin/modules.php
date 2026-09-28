@@ -64,8 +64,14 @@ $locked = ['messages', 'comments', 'search'];
                             </form>
 
                             <span class="u-nowrap">
-                                <?php $rn = preg_replace('/\.index$/', '', (string) $m['admin']); ?>
-                                <?= $m['admin'] ? '<a href="' . e(url('/' . str_replace('.', '/', $rn))) . '">' . e(t('admin.actions')) . '</a>' : '' ?>
+                                <?php
+                                // Yol yine admin_path'ten gelir; rota adından
+                                // türetmek Türkçe kayıtlı rotalarda 404 verir.
+                                $ap = \Core\ModuleRegistry::adminPath($m['slug']);
+                                ?>
+                                <?= ($m['admin'] && $ap)
+                                    ? '<a href="' . e(url('/admin/' . $ap)) . '">' . e(t('admin.actions')) . '</a>'
+                                    : '' ?>
                             </span>
                         </div>
                     </div>

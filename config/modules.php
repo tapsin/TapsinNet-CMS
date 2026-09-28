@@ -125,6 +125,8 @@ return [
         'desc' => ['tr' => 'Ziyaretçi yorumları (onaylı yayınlanır)', 'en' => 'Visitor comments (moderated)'],
         'icon'  => 'comment',
         'admin' => 'admin.comments.index',
+        // Gercek kayitli yol: /admin/yorumlar. Rota adindan turetilemez.
+        'admin_path' => 'yorumlar',
         'route' => null,            // public route yok, herhangi bir içerik altında
         'table' => 'comments',
         'show_home' => false,
@@ -178,6 +180,8 @@ return [
         'desc' => ['tr' => 'İletişim formundan gelen mesajlar', 'en' => 'Contact form inbox'],
         'icon'  => 'inbox',
         'admin' => 'admin.messages.index',
+        // Gercek kayitli yol: /admin/mesajlar.
+        'admin_path' => 'mesajlar',
         'route' => null,
         'table' => 'messages',
         'show_home' => false,
@@ -192,6 +196,8 @@ return [
         'desc' => ['tr' => 'Site geneli içerik araması', 'en' => 'Site-wide content search'],
         'icon'  => 'search',
         'admin' => 'admin.search.index',
+        // Gercek kayitli yol: /admin/ara.
+        'admin_path' => 'ara',
         'route' => 'ara',
         'table' => null,
         'show_home' => false,

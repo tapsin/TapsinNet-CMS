@@ -117,6 +117,29 @@ final class ModuleRegistry
         return self::definitions()[$slug]['admin'] ?? null;
     }
 
+    /**
+     * Modülün yönetim panelindeki GERÇEK yolu (öneki olmadan).
+     *
+     * Neden ayrı: 'admin' değeri bir ROTA ADIDIR (admin.comments.index) ve
+     * noktaları eğrice çevirilerek yol tahmin ediliyordu. Ama comments,
+     * messages ve search rotaları routes/admin.php'te elle, Türkçe yolla
+     * kayıtlı (/admin/yorumlar, /admin/mesajlar, /admin/ara). Tahmin
+     * /admin/comments üretti ve menü 404'e düştü.
+     *
+     * 'admin_path' tanımlıysa o esas alınır; yoksa geriye dönük uyum
+     * için slug kullanılır (dinamik üretilen içerik rotaları İngilizce slug
+     * taşır ve zaten tutarlıdır).
+     */
+    public static function adminPath(string $slug): ?string
+    {
+        $def = self::definitions()[$slug] ?? null;
+        if ($def === null) {
+            return null;
+        }
+        $path = $def['admin_path'] ?? $slug;
+        return $path !== '' ? (string) $path : null;
+    }
+
     public static function table(string $slug): ?string
     {
         return self::definitions()[$slug]['table'] ?? null;

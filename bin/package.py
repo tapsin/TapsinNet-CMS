@@ -11,7 +11,7 @@ Kurallar:
 import os, sys, zipfile, fnmatch, subprocess, datetime
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VERSION = "1.1.3"
+VERSION = "1.1.4"
 PREFIX = f"TapsinNet-CMS-{VERSION}"
 OUT = os.path.join(ROOT, f"{PREFIX}.zip")
 
