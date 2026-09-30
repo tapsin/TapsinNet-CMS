@@ -1,0 +1,17 @@
+# Yükleme klasörü: dosyalara erişime açık, PHP yürütmesi kapalı
+<IfModule mod_authz_core.c>
+    Require all granted
+    <FilesMatch "\.(php|phtml|phar|php[0-9]|cgi|pl|py|sh)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+    Deny from all .php .phtml .phar .html .htm .shtml .cgi .pl .py .sh
+</IfModule>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+Options -ExecCGI -Indexes
+AddType text/plain .php .phtml .phar .html .htm .shtml .cgi .pl .py .sh

@@ -1,0 +1,23 @@
+# =============================================================================
+#  TapsinNet — kök .htaccess
+#  Web kökü public/ olarak ayarlanmamışsa bu dosya koruma sağlar.
+# =============================================================================
+
+# Uygulama koduna doğrudan erişimi engelle
+RewriteEngine On
+RewriteRule ^(app|bootstrap|config|database|lang|routes|storage|tests|bin|vendor|docs)/? - [F,L]
+RewriteRule ^(composer\.(json|lock)|package\.json|\.env|\.env\.example|\.gitignore|\.hallmark) - [F,L]
+RewriteRule ^\. - [F,L]
+
+# Dizin listelemesi kapalı
+Options -Indexes
+
+# config ve storage için ek koruma (public altında değillerse de)
+<FilesMatch "\.(sqlite|db|log|md|sql|ini|lock|json)$">
+    Require all denied
+</FilesMatch>
+
+# Gizli dosyalar
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

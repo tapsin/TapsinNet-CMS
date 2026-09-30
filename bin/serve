@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# ──────────────────────────────────────────��──────────────────────────────────
+#  TapsinNet yerel sunucu yönetimi
+#
+#    bin/serve start | stop | restart | status | log
+#
+#  Port: önce SERVE_PORT, sonra .env içindeki APP_URL, sonra 5050.
+#  Sunucu, bu oturumdan bağımsız çalışsın diye setsid ile ayrılır.
+# ─────────────────────────────────────────────────────────────────────────────
+set -u
+cd "$(dirname "$0")/.."
+
+ACTION="${1:-status}"
+
+PORT="${SERVE_PORT:-}"
+if [ -z "$PORT" ]; then
+  PORT=$(grep -E '^APP_URL=' .env 2>/dev/null | sed -E 's#.*:([0-9]+).*#\1#' | head -1)
+fi
+PORT="${PORT:-5050}"
+BIND="0.0.0.0"
+LOG="storage/logs/server-${PORT}.log"
+PIDFILE="storage/cache/server-${PORT}.pid"
+
+mkdir -p "$(dirname "$LOG")" "$(dirname "$PIDFILE")"
+
+pid() { pgrep -f "^php -S ${BIND}:${PORT} -t public" 2>/dev/null | head -1; }
+
+alive() { [ -n "$(pid)" ] && curl -s -m 2 -o /dev/null "http://127.0.0.1:${PORT}/"; }
+
+case "$ACTION" in
+  start)
+    if alive; then
+      echo "  ✓ zaten çalışıyor — http://127.0.0.1:${PORT}  (PID $(pid))"
+      exit 0
+    fi
+    setsid nohup php -S "${BIND}:${PORT}" -t public public/router.php \
+        >> "$LOG" 2>&1 < /dev/null &
+    for _ in $(seq 1 10); do
+      sleep 1
+      if alive; then
+        echo "$(pid)" > "$PIDFILE"
+        echo "  ✓ başlatıldı — http://127.0.0.1:${PORT}  (PID $(pid))"
+        exit 0
+      fi
+    done
+    echo "  ✗ başlatılamadı. Log: $LOG"
+    tail -5 "$LOG" 2>/dev/null
+    exit 1
+    ;;
+
+  stop)
+    P=$(pid)
+    if [ -z "$P" ]; then echo "  · çalışmıyor"; rm -f "$PIDFILE"; exit 0; fi
+    kill "$P" 2>/dev/null
+    sleep 1
+    kill -9 "$P" 2>/dev/null
+    rm -f "$PIDFILE"
+    echo "  ✓ durduruldu (PID $P)"
+    ;;
+
+  restart)
+    "$0" stop; sleep 1; "$0" start
+    ;;
+
+  status)
+    if alive; then
+      P=$(pid)
+      printf '  ✓ çalışıyor\n'
+      printf '    PID     : %s\n' "$P"
+      printf '    yerel   : http://127.0.0.1:%s\n' "$PORT"
+      IP=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'src \K[\d.]+')
+      [ -n "$IP" ] && printf '    ağ      : http://%s:%s\n' "$IP" "$PORT"
+      printf '    panel   : http://127.0.0.1:%s/admin\n' "$PORT"
+      printf '    süre    : %s\n' "$(ps -o etime= -p "$P" 2>/dev/null | xargs)"
+    else
+      printf '  ✗ çalışmıyor  →  bin/serve start\n'
+    fi
+    ;;
+
+  log)
+    [ -f "$LOG" ] && tail -30 "$LOG" || echo "  log yok: $LOG"
+    ;;
+
+  *)
+    echo "Kullanım: bin/serve {start|stop|restart|status|log}"
+    exit 1
+    ;;
+esac

@@ -1,0 +1,9 @@
+/* ============================================================================
+ *  TapsinNet — Google/Roboto tipografi kaynağı
+ * ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-ppneuemontreal: 'Roboto', 'Google Sans', 'Product Sans', Arial, sans-serif;
+}

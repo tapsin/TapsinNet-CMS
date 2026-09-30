@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# ─────────────────────────────────────────────────────────────────────────────
+#  Demo kapak görselleri üretir → public/uploads/demo/
+#
+#  GEÇİCİ YER TUTUCULAR. Tematik soyut kompozisyonlardır; gerçek iş ekran
+#  görüntüleri DEĞİLDİR. Dosya adları "demo-" önekiyle başır. Panelden
+#  kendi fotoğraflarını yüklediğinde bunların yerini gerçek görseller alır.
+#
+#  Renkler tokens.css'teki Atelier paletinden:
+#    kağıt #f6f1e7 · mürekkep #211a12 · oker #c05a1e · kiremit #9c4a2f
+#
+#  Not: bu ImageMagick derlemesinde `gradient:` sözde-biçimi yok, bu yüzden
+#  derinlik yarı saydam katmanlarla kurulur.
+# ─────────────────────────────────────────────────────────────────────────────
+set -e
+cd "$(dirname "$0")/.."
+OUT="public/uploads/demo"
+rm -rf "$OUT"; mkdir -p "$OUT"
+
+INK="#211a12"; INK_FAINT="#7a6a58"
+PAPER="#f6f1e7"; PAPER2="#efe8dc"; PAPER3="#e6dccb"
+ACCENT="#c05a1e"; ACCENT2="#e0a458"; CLAY="#9c4a2f"; SAGE="#6b7a5a"
+
+gen() {   # $1=ad $2=w $3=h $4=kompozisyon
+  local name=$1 w=$2 h=$3 comp=$4
+  local t="$OUT/.tmp.webp"
+
+  case "$comp" in
+    arch)   magick -size "${w}x${h}" "xc:${PAPER}" \
+              -fill "${PAPER3}" -draw "polygon 0,${h} 0,$((h*60/100)) $((w*22/100)),$((h*38/100)) $((w*50/100)),$((h*64/100)) $((w*76/100)),$((h*42/100)) ${w},$((h*58/100)) ${w},${h}" \
+              -fill "${ACCENT}" -draw "polygon 0,${h} 0,$((h*74/100)) $((w*34/100)),$((h*54/100)) $((w*68/100)),$((h*78/100)) ${w},$((h*70/100)) ${w},${h}" \
+              -fill "${INK}"     -draw "polygon 0,${h} 0,$((h*86/100)) $((w*30/100)),$((h*74/100)) $((w*72/100)),$((h*90/100)) ${w},$((h*84/100)) ${w},${h}" \
+              -fill "${ACCENT}" -draw "rectangle $((w/12)),$((h/8)) $((w/12+w/14)),$((h/8+6))" \
+              -fill "${INK_FAINT}" -draw "rectangle $((w/12)),$((h/8+h/12)) $((w/12+w/5)),$((h/8+h/12+3))" "$t" ;;
+
+    bands)  magick -size "${w}x${h}" "xc:${PAPER}" \
+              -fill "${PAPER3}" -draw "rectangle 0,0,${w},$((h*10/100))" \
+              -fill "${ACCENT}"  -draw "rectangle $((w/8)),0 $((w/8+w/11)),${h}" \
+              -fill "${ACCENT2}" -draw "rectangle $((w/8+w/11+w/8)),0 $((w/8+w/11+w/8+w/8)),${h}" \
+              -fill "${INK}"     -draw "rectangle $((w/8+w/11+w/8+w/8+w/8)),0 $((w/8+w/11+w/8+w/8+w/8+w/13)),${h}" \
+              -fill "${CLAY}"    -draw "rectangle $((w/8+w/11+w/8+w/8+w/8+w/13+w/8)),$((h*3/8)) $((w/8+w/11+w/8+w/8+w/8+w/13+w/8+w/7)),$((h*7/8))" \
+              -fill "${INK_FAINT}" -draw "rectangle 0,$((h*92/100)),${w},$((h*92/100+4))" "$t" ;;
+
+    grid)   magick -size "${w}x${h}" "xc:${PAPER2}" \
+              -fill "${PAPER}"  -draw "rectangle $((w/12)),$((h/10)) $((w*19/24)),$((h*9/10))" \
+              -fill "${PAPER3}" -draw "rectangle $((w/12+6)),$((h/10+6)) $((w*19/24-6)),$((h*9/10-6))" \
+              -fill "${CLAY}"    -draw "rectangle $((w/12+14)),$((h/10+14)) $((w/12+14+w/10)),$((h/10+14+h/16))" \
+              -fill "${INK_FAINT}" -draw "rectangle $((w/12+14)),$((h*32/100)) $((w*16/24)),$((h*32/100+4))" \
+              -fill "${INK_FAINT}" -draw "rectangle $((w/12+14)),$((h*42/100)) $((w*15/24)),$((h*42/100+4))" \
+              -fill "${INK_FAINT}" -draw "rectangle $((w/12+14)),$((h*52/100)) $((w*14/24)),$((h*52/100+4))" \
+              -fill "${ACCENT}" -draw "circle $((w*5/6)),$((h*9/20)) $((w*5/6+w/22)),$((h*9/20))" \
+              -fill "${PAPER}" -draw "circle $((w*5/6)),$((h*9/20)) $((w*5/6+w/12)),$((h*9/20))" \
+              -fill "${INK}" -draw "rectangle $((w*3/5)),$((h*72/100)) $((w*11/12)),$((h*72/100+8))" "$t" ;;
+
+    stripe) magick -size "${w}x${h}" "xc:${PAPER}" \
+              -fill "${PAPER3}" -draw "rectangle 0,0,${w},$((h*12/100))" \
+              -fill "${ACCENT}"  -draw "rectangle 0,$((h*18/100)),${w},$((h*18/100+h/20))" \
+              -fill "${INK}"     -draw "rectangle 0,$((h*44/100)),${w},$((h*44/100+h/32))" \
+              -fill "${CLAY}"    -draw "rectangle 0,$((h*68/100)),${w},$((h*68/100+h/26))" \
+              -fill "${ACCENT2}" -draw "circle $((w*5/6)),$((h/2)) $((w*5/6+w/20)),$((h/2))" \
+              -fill "${INK_FAINT}" -draw "rectangle 0,$((h*92/100)),${w},$((h*92/100+4))" "$t" ;;
+
+    phone)  magick -size "${w}x${h}" "xc:${PAPER2}" \
+              -fill "${PAPER3}" -draw "circle $((w*78/100)),$((h*20/100)) $((w*78/100+w/8)),$((h*20/100))" \
+              -fill "${INK}"  -draw "roundrectangle $((w*32/100)),$((h*8/100)) $((w*68/100)),$((h*95/100)) $((w/40)),$((w/40))" \
+              -fill "${PAPER}" -draw "roundrectangle $((w*32/100+w/50)),$((h*8/100+w/50)) $((w*68/100-w/50)),$((h*95/100-h/28)) $((w/55)),$((w/55))" \
+              -fill "${ACCENT}" -draw "roundrectangle $((w*32/100+w/50)),$((h*8/100+w/50)) $((w*68/100-w/50)),$((h*8/100+w/50+h/11)) $((w/60)),$((w/60))" \
+              -fill "${INK_FAINT}" -draw "rectangle $((w*32/100+w/34)),$((h*34/100)) $((w*68/100-w/34)),$((h*34/100+4))" \
+              -fill "${INK_FAINT}" -draw "rectangle $((w*32/100+w/34)),$((h*44/100)) $((w*68/100-w/24)),$((h*44/100+4))" \
+              -fill "${CLAY}"    -draw "roundrectangle $((w*40/100)),$((h*74/100)) $((w*60/100)),$((h*74/100+h/26)) $((w/70)),$((w/70))" "$t" ;;
+
+    seal)   magick -size "${w}x${h}" "xc:${PAPER}" \
+              -fill "${PAPER2}" -draw "rectangle 0,0,${w},$((h*8/100))" \
+              -fill "${PAPER3}" -draw "rectangle 0,$((h*92/100)),${w},${h}" \
+              -fill none -stroke "${CLAY}" -strokewidth $((w/90+2)) \
+              -draw "circle $((w/2)),$((h*40/100)) $((w/2+w/22)),$((h*40/100))" \
+              -strokewidth $((w/160+1)) -stroke "${ACCENT}" \
+              -draw "circle $((w/2)),$((h*40/100)) $((w/2+w*17/100)),$((h*40/100))" \
+              -stroke none -fill "${INK}" \
+              -draw "polygon $((w/2)),$((h*40/100-w/16)) $((w/2+w/26)),$((h*40/100)) $((w/2)),$((h*40/100+w/16)) $((w/2-w/26)),$((h*40/100))" \
+              -fill "${INK_FAINT}" -draw "rectangle $((w/4)),$((h*72/100)) $((w*3/4)),$((h*72/100+5))" \
+              -draw "rectangle $((w/3)),$((h*80/100)) $((w*2/3)),$((h*80/100+3))" \
+              -fill "${ACCENT}" -draw "rectangle $((w*44/100)),$((h*87/100)) $((w*56/100)),$((h*87/100+6))" "$t" ;;
+
+    wave)   magick -size "${w}x${h}" "xc:${PAPER}" \
+              -fill "${SAGE}" \
+              -draw "path 'M 0,$((h*56/100)) C $((w*22/100)),$((h*34/100)) $((w*46/100)),$((h*74/100)) ${w},$((h*40/100)) L ${w},${h} L 0,${h} Z'" \
+              -fill "${CLAY}" \
+              -draw "path 'M 0,$((h*72/100)) C $((w*30/100)),$((h*58/100)) $((w*64/100)),$((h*92/100)) ${w},$((h*66/100)) L ${w},${h} L 0,${h} Z'" \
+              -fill "${ACCENT}" \
+              -draw "path 'M 0,$((h*86/100)) C $((w*34/100)),$((h*78/100)) $((w*70/100)),$((h*99/100)) ${w},$((h*84/100)) L ${w},${h} L 0,${h} Z'" \
+              -fill "${INK}"   -draw "circle $((w*18/100)),$((h*26/100)) $((w*18/100+w/26)),$((h*26/100))" \
+              -fill "${PAPER}" -draw "circle $((w*18/100)),$((h*26/100)) $((w*18/100+w/13)),$((h*26/100))" "$t" ;;
+
+    beat)   magick -size "${w}x${h}" "xc:${ACCENT}" \
+              -fill "rgba(246,241,231,0.13)" -draw "circle $((w/2)),$((h/2)) $((w/2+w/2)),$((h/2))" \
+              -fill "rgba(246,241,231,0.20)" -draw "circle $((w/2)),$((h/2)) $((w/2+w*32/100)),$((h/2))" \
+              -fill "rgba(246,241,231,0.14)" -draw "circle $((w/2)),$((h/2)) $((w/2+w*40/100)),$((h/2))" \
+              -fill "${PAPER}" -draw "circle $((w/2)),$((h/2)) $((w/2+w/14)),$((h/2))" \
+              -fill "${CLAY}"  -draw "circle $((w/2)),$((h/2)) $((w/2+w/7)),$((h/2))" "$t" ;;
+    *) echo "bilinmeyen kompozisyon: $comp" >&2; rm -f "$t"; return 1 ;;
+  esac
+
+  mv "$t" "$OUT/$name.webp"
+  printf '  %-22s %5s×%-5s %-7s %4s KB\n' "$name.webp" "$w" "$h" "$comp" "$(( $(stat -c%s "$OUT/$name.webp") / 1024 ))"
+}
+
+echo "Demo kapak görselleri üretiliyor → $OUT"; echo
+
+gen demo-is-01     1600 1000 arch
+gen demo-is-02     1600 1000 grid
+gen demo-is-03     1600 1000 bands
+gen demo-is-04     1600 1000 phone
+gen demo-is-05     1600 1000 stripe
+gen demo-is-06     1600 1000 wave
+gen demo-haber-01 1200  800 arch
+gen demo-haber-02 1200  800 grid
+gen demo-haber-03 1200  800 wave
+gen demo-belge-01 1000 1294 seal
+gen demo-belge-02 1000 1294 seal
+gen demo-belge-03 1000 1294 seal
+gen demo-belge-04 1000 1294 seal
+gen demo-sosyal-01 1000 1000 beat
+gen demo-sosyal-02 1000 1000 beat
+gen demo-profil-01 800   800 seal
+
+echo
+echo "Toplam: $(ls -1 "$OUT"/*.webp 2>/dev/null | wc -l) dosya · $(( $(du -sk "$OUT" | cut -f1) )) KB"

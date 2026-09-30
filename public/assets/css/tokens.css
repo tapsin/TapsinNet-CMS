@@ -1,0 +1,135 @@
+/* ============================================================================
+ *  TapsinNet — Dala TASARIM SİSTEMİ / TOKEN KATMANI
+ *  Theme: dark void · Electric Iris · Saffron Spark
+ *  -------------------------------------------------------------------------
+ *  Bu dosya tek gerçek kaynaktır: ne theme.css ne de şablonlar
+ *  ham hex/oklch yazabilir. Bir değere ihtiyaç duyarsanız ÖNCE buraya
+ *  isimli token olarak ekleyin, sonra var(--token) ile referans verin.
+ *
+ *  Dala kuralı: pure black canvas, scale-driven hierarchy (not weight),
+ *  weight 200 body / weight 400 headlines, —0.04em tracking on 42px+.
+ *  ========================================================================= */
+
+:root {
+  /* ---------------------------------------------------------------- RENK
+     Void canvas + two chromatic accents + gray scale for text hierarchy.
+     No dark-gray panels — void is the design. */
+  --color-void:            #0b1010;
+  --color-bone-white:      #f5f5ec;
+  --color-ash-gray:        #aab7b4;
+  --color-silver-mist:     #71817e;
+  --color-electric-iris:   #c8f04a;
+  --color-saffron-spark:   #ff7a59;
+  --color-deep-verdant:    #152321;
+
+  /* Koyu yüzey (footer, video-modal gibi koyu bölgeler — sadece ihtiyacınca) */
+  --color-dark:            #152321;
+  --color-dark-2:          #29403b;
+  --color-dark-ink:        #f5f5ec;
+  --color-dark-muted:      #71817e;
+  --color-dark-rule:       #29403b;
+
+  /* Durum renkleri — asla tek sinyal olarak kullanılmaz */
+  --color-success:         oklch(48% 0.115 150);
+  --color-danger:          oklch(48% 0.160 25);
+  --color-warning:         oklch(58% 0.130 75);
+
+  /* Odak / seçim */
+  --color-focus:           oklch(65% 0.20 280);
+  --color-selection:       oklch(30% 0.10 280);
+
+  /* Gölge — Dala'da yok ama fallback için */
+  --shadow-none:           none;
+
+  /* ------------------------------------------------------------ TİPOGRAFİ
+     PPNeueMontreal single typeface. Substitute: Inter.
+     Weight 400 hem 113px display hem 15px body — scale, not weight,
+     creates hierarchy. Weight 200 body is the signature. */
+  --font-ppneuemontreal:   'IBM Plex Sans', 'Inter', Arial, sans-serif;
+  --font-body:             var(--font-ppneuemontreal);
+  --font-display:          'Fraunces', Georgia, serif;
+  --font-mono:             "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --weight-extralight:     400;
+  --weight-regular:        400;
+  --weight-semibold:       600;
+  --weight-bold:           700;
+  --weight-display:        400;       /* Dala signature: 400 doing display work */
+
+  --leading-tight:         1.08;
+  --leading-snug:          1.20;
+  --leading-normal:        1.50;
+  --leading-relaxed:       1.60;
+
+  /* Negatif tracking — display sizes 42px+ */
+  --tracking-display:      -0.04em;
+  --tracking-heading:      -0.04em;
+  --tracking-heading-sm:   -0.0168em;  /* ~-1.68px at 42px */
+  --tracking-heading-2xs:  -0.0048em;  /* ~-0.48px at 24px */
+  --tracking-label:        0.025em;
+  --tracking-normal:       0;
+
+  --measure:               65ch;
+  --measure-narrow:        48ch;
+
+  /* Type scale (Dala: 12 14 15 18 24 27 36 42 48 78 113) */
+  --text-caption:          0.75rem;
+  --text-nav-label:        0.875rem;
+  --text-body:             1.125rem;     /* 18px */
+  --text-heading-2xs:      1.5rem;      /* 24px */
+  --text-heading-xs:       1.6875rem;   /* 27px */
+  --text-subheading:       2.25rem;     /* 36px */
+  --text-heading-sm:       2.625rem;    /* 42px */
+  --text-heading:          3rem;        /* 48px */
+  --text-heading-lg:       5.75rem;     /* 92px */
+  --text-display:          7.0625rem;   /* 113px */
+
+  /* --------------------------------------------------------------- BOŞLUK
+     6px tabanlı Dala ölçeği */
+  --space-6:   0.375rem;
+  --space-12:  0.75rem;
+  --space-18:  1.125rem;
+  --space-24:  1.5rem;
+  --space-30:  1.875rem;
+  --space-36:  2.25rem;
+  --space-60:  3.75rem;
+  --space-96:  6rem;
+  --space-120: 7.5rem;
+
+  /* Yerleşim */
+  --container:       80rem;     /* ~1280px */
+  --container-narrow:56rem;
+  --gutter:          clamp(1.25rem, 4vw, 2.5rem);
+  --masthead-h:      3.5rem;
+
+  /* --------------------------------------------------------------- KÖŞE
+     Dala: 24px consistent radius for buttons/cards/nav; pill for tags */
+  --radius-3xl:      1.25rem;
+  --radius-full:     9999px;
+  --radius-pill:     9999px;
+
+  /* -------------------------------------------------------------- HAREKET
+     Yalnızca transform ve opacity */
+  --ease-out:        cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:         cubic-bezier(0.4, 0, 1, 1);
+  --dur-fast:        140ms;
+  --dur-base:        220ms;
+
+  /* -------------------------------------------------------------- KATMAN */
+  --z-base:    0;
+  --z-raised:  10;
+  --z-sticky:  100;
+  --z-nav:     200;
+  --z-overlay: 300;
+  --z-modal:   400;
+}
+
+/* Koyu yüzey yardımcısı */
+.on-dark {
+  background: var(--color-dark);
+  color: var(--color-dark-ink);
+}
+.on-dark h1, .on-dark h2, .on-dark h3, .on-dark h4 { color: var(--color-dark-ink); }
+.on-dark .muted, .on-dark .text-muted { color: var(--color-dark-muted); }
+.on-dark a { color: var(--color-electric-iris); }
+.on-dark a:hover { color: var(--color-bone-white); }
